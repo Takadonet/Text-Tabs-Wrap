@@ -69,7 +69,7 @@ sub unexpand(*@in) is export {
 # 					$x =~ s/\t/^I\t/gs;
 # 					print "sub on '$x'\n";
 # 				}
-				$y ~~ s/\s**2..*/\t/;
+				$y ~~ s/\s\s+$/\t/;
  			}
  			$line = join('',@e, $lastbit);
  		}
