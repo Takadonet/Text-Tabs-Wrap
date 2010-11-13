@@ -4,9 +4,9 @@ module Text::Wrap{
 # @EXPORT_OK = qw($columns $break $huge);
 
 # $VERSION = 2009.0305;
-our ($VERSION,$columns,$debug,$break,$huge ,$unexpand,$tabstop,$separator,$separator2);
+our ($VERSION,$columns,$debug,$break,$huge,$unexpand,$tabstop,$separator,$separator2);
 
- BEGIN	{
+BEGIN	{
 	@*INC.push('../');
 	@*INC.push('lib/');
  }
@@ -52,9 +52,8 @@ sub wrap($ip,$xp,*@t) is export {
  	$ll = 0 if $ll < 0;
  	my $nl = "";
  	my $remainder = "";
-
 	while $t !~~ m/^^\s*$$/ {
- 		if $t ~~ m/^(\N**0..*) <?{$0.chars <= $ll}> (\s|\n+|$$)(.*)/ {
+ 		if $t ~~ m/^(\N**0..*) <?{$0.chars <= $ll}> ($break|\n+|$$)(.*)/ {
  			if $unexpand { 
  				$r ~=  unexpand($nl ~ $lead ~ $0)
 			}
