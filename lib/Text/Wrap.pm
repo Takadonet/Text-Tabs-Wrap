@@ -1,8 +1,4 @@
 module Text::Wrap{
-
-# use warnings::register;
-# require Exporter;
-
 # @ISA = qw(Exporter);
 # @EXPORT = qw(wrap fill);
 # @EXPORT_OK = qw($columns $break $huge);
@@ -57,9 +53,8 @@ sub wrap($ip,$xp,*@t) is export {
  	my $nl = "";
  	my $remainder = "";
 
-
 	while $t !~~ m/^^\s*$$/ {
- 		if $t ~~ m/(\N**0..*) <?{$0.chars <= $ll}> (\s|\n+|$$)(.*)/ {
+ 		if $t ~~ m/^(\N**0..*) <?{$0.chars <= $ll}> (\s|\n+|$$)(.*)/ {
  			if $unexpand { 
  				$r ~=  unexpand($nl ~ $lead ~ $0)
 			}
@@ -83,13 +78,14 @@ sub wrap($ip,$xp,*@t) is export {
 				$remainder =  $separator;
 			}
 # 		} elsif ($huge eq 'overflow' && $t =~ /\G([^\n]*?)($break|\n+|\z)/xmgc) {
- 		} elsif ($huge eq 'overflow' && $t ~~ /([^\n]*?)($break|\n+|$)/) {
+ 		} elsif ($huge eq 'overflow' && $t ~~ /(\N*?)($break|\n+|$)(.*)/) {
 			if  $unexpand {
  				$r ~= unexpand($nl ~ $lead ~ $0);
 			} else {
  				$r ~= $nl ~ $lead ~ $0;
 			}
  			$remainder = $1;
+			$t = $2;
  		} 
 		elsif $huge eq 'die' {
  			die "couldn't wrap '$t'";

@@ -1,7 +1,10 @@
 use v6;
+BEGIN {
+        @*INC.push('lib');
+}
 
-# #!/usr/bin/perl -I.
 ##warning watch out when uncommenting comments symbol for @tests
+my @tests = () ;
 # @tests = (split(/\nEND\n/s, <<DONE));
 # TEST1
 # This 
@@ -85,19 +88,18 @@ use v6;
 # DONE
 
 
-# $| = 1;
 
-# print "1..", 1 +@tests, "\n";
+say "1..", 1 +@tests;
 
-# use Text::Wrap;
-# $Text::Wrap::separator = '=';
+use Text::Wrap;
+$Text::Wrap::separator = '=';
 
 # $rerun = $ENV{'PERL_DL_NONLAZY'} ? 0 : 1;
 
-# $tn = 1;
+my $tn = 1;
 
-# @st = @tests;
-# while (@st) {
+my @st = @tests;
+while (@st) {
 # 	my $in = shift(@st);
 # 	my $out = shift(@st);
 
@@ -128,7 +130,7 @@ use v6;
 # 	}
 # 	$tn++;
 
-# }
+}
 
 # @st = @tests;
 # while(@st) {
@@ -166,10 +168,14 @@ use v6;
 # 	$tn++;
 # }
 
-# $Text::Wrap::huge = 'overflow';
-
-# my $tw = 'This_is_a_word_that_is_too_long_to_wrap_we_want_to_make_sure_that_the_program_does_not_crash_and_burn';
-# my $w = wrap('zzz','yyy',$tw);
-# print (($w eq "zzz$tw") ? "ok $tn\n" : "not ok $tn");
-# $tn++;
-
+$Text::Wrap::huge = 'overflow';
+my $tw = 'This_is_a_word_that_is_too_long_to_wrap_we_want_to_make_sure_that_the_program_does_not_crash_and_burn';
+my $w = wrap('zzz','yyy',$tw);
+if $w eq "zzz$tw" {
+	say "ok $tn"
+}
+else {
+	say "not ok $tn";
+}
+$tn++;
+	
