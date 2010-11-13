@@ -1,13 +1,20 @@
 use v6;
 
-# #!/usr/bin/perl -I.
+BEGIN {
+	@*INC.push('lib');
+}
+use Text::Wrap;
 
-# use Text::Wrap;
+say "1..1";
 
-# print "1..1\n";
+$Text::Wrap::columns = 1;
 
-# $Text::Wrap::columns = 1;
-# eval { wrap('', '', ''); };
+eval wrap('', '', '');
 
-# print $@ ? "not ok 1\n" : "ok 1\n";
+if $! {
+	 say 'no ok';
+}
+else {
+	say 'ok 1';
+}	
 
