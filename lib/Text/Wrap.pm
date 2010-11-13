@@ -53,7 +53,7 @@ sub wrap($ip,$xp,*@t) is export {
  	my $nl = "";
  	my $remainder = "";
 	while $t !~~ m/^^\s*$$/ {
- 		if $t ~~ m/^(\N**0..*) <?{$0.chars <= $ll}> ($break|\n+|$$)(.*)/ {
+ 		if $t ~~ m/^(\N**0..*) <?{$0.chars <= $ll}> (\s|\n+|$$)(.*)/ {
  			if $unexpand { 
  				$r ~=  unexpand($nl ~ $lead ~ $0)
 			}
