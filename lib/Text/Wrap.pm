@@ -65,7 +65,7 @@ sub wrap($ip,$xp,*@t) is export {
 			$t = $2;
 		}
  		#elsif $huge eq 'wrap' && $t =~ /\G([^\n]{$ll})/gc) {
- 		elsif $huge eq 'wrap' && $t ~~ /(<-[\n]> ** 0..2)/ {
+ 		elsif $huge eq 'wrap' && $t ~~ m/^(\N*?|\N**0..*)(.*?)/ {
  			if $unexpand {
  				$r ~= unexpand($nl ~ $lead ~ $0);
 			}
@@ -77,6 +77,7 @@ sub wrap($ip,$xp,*@t) is export {
 			} else {
 				$remainder =  $separator;
 			}
+			$t = $1;
 # 		} elsif ($huge eq 'overflow' && $t =~ /\G([^\n]*?)($break|\n+|\z)/xmgc) {
  		} elsif ($huge eq 'overflow' && $t ~~ /(\N*?)($break|\n+|$)(.*)/) {
 			if  $unexpand {
