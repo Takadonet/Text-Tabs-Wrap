@@ -63,13 +63,12 @@ while (@tests) {
 	my $in = shift(@tests);
 	my $out = shift(@tests);
 
-	#$in =~ s/^TEST(\d+)?\n//;
 	$in ~~ s/^TEST(\d+)?\n//;
 
 	my $back = fill('    ', ' ', $in);
 
 	if ($back eq $out) {
-		print "ok $tn\n";
+		say "ok $tn";
 #	} elsif ($rerun) {
 #		my $oi = $in;
 #		write_file("#o", $back);
