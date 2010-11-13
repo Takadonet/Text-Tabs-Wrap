@@ -57,26 +57,17 @@ sub wrap($ip,$xp,*@t) is export {
  	my $nl = "";
  	my $remainder = "";
 
-# 	use re 'taint';
 
-# 	pos($t) = 0;
- 	#while ($t !~ /\G(?:$break)*\Z/gc) {
-# 	while $t !~~ g/($break)$/ {
-#		say $t;
-#	}
-	my @lines = $t.comb(/\N+/);
-	for (@lines) -> $t {
-	# 	while ($t !~~ m/\s*/ ) {
- #		if ($t =~ /\G([^\n]{0,$ll})($break|\n+|\z)/xmgc) {
- 		if $t ~~ m/(\N** 0..71)($break|\n+|$)/ {
+	while $t !~~ m/^^\s*$$/ {
+ 		if $t ~~ m/(\N**0..*) <?{$0.chars <= $ll}> (\s|\n+|$$)(.*)/ {
  			if $unexpand { 
  				$r ~=  unexpand($nl ~ $lead ~ $0)
 			}
 			else {
  				$r ~=  $nl ~ $lead ~ $0;
 			}
-			
  			$remainder = $1;
+			$t = $2;
 		}
  		#elsif $huge eq 'wrap' && $t =~ /\G([^\n]{$ll})/gc) {
  		elsif $huge eq 'wrap' && $t ~~ /(<-[\n]> ** 0..2)/ {
@@ -154,14 +145,13 @@ sub fill($ip,$xp,*@raw) is export
  	# if paragraph_indent is the same as line_indent, 
  	# separate paragraphs with blank lines
 
-# 	my $ps = ($ip eq $xp) ? "\n\n" : "\n";
  	my $ps;
 	if $ip eq $xp {
 		$ps = "\n\n";
 	} else {
 		$ps = "\n";
 	}
- 	return join ($ps, @para);
+ 	return  @para.join($ps);
 }
 
 # 1;
