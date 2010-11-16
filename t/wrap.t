@@ -114,68 +114,71 @@ use Text::Wrap;
 my $tn = 1;
 
 my @st = @tests;
-while (@st) {
- 	my $in = shift(@st);
- 	my $out = shift(@st);
+ while (@st) {
+  	my $in = shift(@st);
+  	my $out = shift(@st);
         
-# 	$in =~ s/^TEST(\d+)( break=(.*))?\n//
-        # 	    or die "bad TEST header line: $in\n";
         if $in ~~ /^TEST(\d+)[\s break\=(\N+)]?\n/ {
             #hardcoded the answer for now since i believe it's a bug
-           $Text::Wrap::break = rx{\d} if $1;
-           
-        }
-        $in ~~ s/^TEST\d+(\s break\=\N+)?\n//;
+            $Text::Wrap::break = rx{\d} if $1;
+         }
+         $in ~~ s/^TEST\d+(\s break\=\N+)?\n//;
         
 
- 	my $back = wrap('   ', ' ', $in);
+  	my $back = wrap('   ', ' ', $in);
         
- 	if $back eq $out {
- 		say "ok $tn";
- 	}
-#        elsif ($rerun) {
-# 		my $oi = $in;
-# 		foreach ($in, $back, $out) {
-# 			s/\t/^I\t/gs;
-# 			s/\n/\$\n/gs;
-# 		}
-# 		print "------------ input ------------\n";
-# 		print $in;
-# 		print "\n------------ output -----------\n";
-# 		print $back;
-# 		print "\n------------ expected ---------\n";
-# 		print $out;
-# 		print "\n-------------------------------\n";
-# 		$Text::Wrap::debug = 1;
-# 		wrap('   ', ' ', $oi);
-# 		exit(1);
- 	else {
- 		say "not ok $tn";
- 	}
- 	$tn++;
+  	if $back eq $out {
+  		say "ok $tn";
+  	}
+ #        elsif ($rerun) {
+ # 		my $oi = $in;
+ # 		foreach ($in, $back, $out) {
+ # 			s/\t/^I\t/gs;
+ # 			s/\n/\$\n/gs;
+ # 		}
+ # 		print "------------ input ------------\n";
+ # 		print $in;
+ # 		print "\n------------ output -----------\n";
+ # 		print $back;
+ # 		print "\n------------ expected ---------\n";
+ # 		print $out;
+ # 		print "\n-------------------------------\n";
+ # 		$Text::Wrap::debug = 1;
+ # 		wrap('   ', ' ', $oi);
+ # 		exit(1);
+  	else {
+  		say "not ok $tn";
+  	}
+  	$tn++;
 
 }
+#need to restore back to default $Text::Wrap::break
+#todo resolve this by limiting the scope of changes of 'break'. Perl 5 local would be nice
+$Text::Wrap::break = rx{\s};
 
- @st = @tests;
- while(@st) {
+@st = @tests;
+while(@st) {
  	my $in = shift(@st);
  	my $out = shift(@st);
 
-# 	$in =~ s/^TEST(\d+)( break=(.*))?\n//
-# 	    or die "bad TEST header line: $in\n";
         if $in ~~ /^TEST(\d+)[\s break\=(\N+)]?\n/ {
             #hardcoded the answer for now since i believe it's a bug
             $Text::Wrap::break = rx{\d} if $1;
         }
-# 	local $Text::Wrap::break = $3 if defined $3;
 
-# 	my @in = split("\n", $in, -1);
-# 	@in = ((map { "$_\n" } @in[0..$#in-1]), $in[-1]);
-	
-# 	my $back = wrap('   ', ' ', @in);
 
-# 	if ($back eq $out) {
-# 		print "ok $tn\n";
+        my @in = $in.split(/\n/);
+        #get rid of test number
+        @in.shift();
+
+        
+        #append "\n" to all entries but the last
+        @in[0 ..^ @in-1] >>~=>> "\n";
+
+ 	my $back = wrap('   ', ' ', @in);
+
+ 	if ($back eq $out) {
+ 		print "ok $tn\n";
 # 	} elsif ($rerun) {
 # 		my $oi = $in;
 # 		foreach ($in, $back, $out) {
@@ -192,22 +195,34 @@ while (@st) {
 # 		$Text::Wrap::debug = 1;
 # 		wrap('   ', ' ', $oi);
 # 		exit(1);
-# 	} else {
-# 		print "not ok $tn\n";
-# 	}
+ 	} else {
+ 		print "not ok $tn\n";
+ 	}
 	$tn++;
 }
 
-# $Text::Wrap::huge = 'overflow';
+$Text::Wrap::huge = 'overflow';
 
-# my $tw = 'This_is_a_word_that_is_too_long_to_wrap_we_want_to_make_sure_that_the_program_does_not_crash_and_burn';
-# my $w = wrap('zzz','yyy',$tw);
-# print (($w eq "zzz$tw") ? "ok $tn\n" : "not ok $tn");
-# $tn++;
+my $tw = 'This_is_a_word_that_is_too_long_to_wrap_we_want_to_make_sure_that_the_program_does_not_crash_and_burn';
+my $w = wrap('zzz','yyy',$tw);
+if $w eq "zzz$tw" {
+    say "ok $tn";
+}
+else {
+    say "not ok $tn";
+}
 
-# {
-#     local $Text::Wrap::columns = 10;
-#     local $Text::Wrap::huge = "wrap";
-#     print ((wrap("verylongindent", "", "foo") eq "verylongindent\nfoo") ? "ok $tn\n" : "not ok $tn");
-#     $tn++;
-# }
+$tn++;
+
+{
+      $Text::Wrap::columns = 10;
+      $Text::Wrap::huge = "wrap";
+      if wrap("verylongindent", "", "foo") eq "verylongindent\nfoo" {
+          say "ok $tn";
+      }
+      else {
+          say "not ok $tn";
+      }
+      
+      $tn++;
+}

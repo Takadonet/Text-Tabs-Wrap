@@ -22,8 +22,8 @@ $separator2;
 #use Text::Tabs qw(expand unexpand);
 use Text::Tabs;
 
-sub wrap($ip,$xp,*@t) is export {
 
+sub wrap($ip,$xp,*@t) is export {
 # 	local($Text::Tabs::tabstop) = $tabstop;
  	my $r = "";
  	my $tail = pop(@t);
@@ -31,10 +31,10 @@ sub wrap($ip,$xp,*@t) is export {
 	my @yo;
 	for (@t) -> $x {
 		if $x ~~ /\s+$/ { 
-			@yo.push($_);
+			@yo.push($x);
 		}
 		else {
-			@yo.push($_ ~ ' ');
+			@yo.push($x ~ ' ');
 		}
 	}
 	my $line = join("",@yo , $tail); 
