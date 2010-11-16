@@ -120,6 +120,7 @@ my @st = @tests;
         
         if $in ~~ /^TEST(\d+)[\s break\=(\N+)]?\n/ {
             #hardcoded the answer for now since i believe it's a bug
+            #todo fix this
             $Text::Wrap::break = rx{\d} if $1;
          }
          $in ~~ s/^TEST\d+(\s break\=\N+)?\n//;
@@ -163,6 +164,7 @@ while(@st) {
 
         if $in ~~ /^TEST(\d+)[\s break\=(\N+)]?\n/ {
             #hardcoded the answer for now since i believe it's a bug
+            #todo fix this!
             $Text::Wrap::break = rx{\d} if $1;
         }
 
