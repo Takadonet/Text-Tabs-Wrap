@@ -10,10 +10,10 @@ BEGIN	{
 	@*INC.push('../');
 	@*INC.push('lib/');
  }
-
+my regex break { \s };
 $columns = 76;  # <= screen width
 $debug = 0;
-$break = '\s';
+$break = rx{\s};
 $huge = 'wrap'; # alternatively: 'die' or 'overflow'
 $unexpand = 1;
 $tabstop = 8;
@@ -45,15 +45,15 @@ sub wrap($ip,$xp,*@t) is export {
  	if $nll <= 0 && $xp ne '' {
  		my $nc = expand($xp).chars + 2;
 # 		warnings::warnif "Increasing \$Text::Wrap::columns from $columns to $nc to accommodate length of subsequent tab";
- 		$columns = $nc;
- 		$nll = 1;
+		$columns = $nc;
+		$nll = 1;
  	}
  	my $ll = $columns - expand($ip).chars - 1;
  	$ll = 0 if $ll < 0;
  	my $nl = "";
  	my $remainder = "";
-	while $t !~~ m/^^\s*$$/ {
- 		if $t ~~ m/^(\N**0..*) <?{$0.chars <= $ll}> (\s|\n+|$$)(.*)/ {
+	while $t !~~ m/^\s*$/ {
+ 		if $t ~~ m/^(\N**0..*) <?{$0.chars <= $ll}> (<$break>|\n+|$)(.*)/ {
  			if $unexpand { 
  				$r ~=  unexpand($nl ~ $lead ~ $0)
 			}
@@ -64,7 +64,7 @@ sub wrap($ip,$xp,*@t) is export {
 			$t = $2;
 		}
  		#elsif $huge eq 'wrap' && $t =~ /\G([^\n]{$ll})/gc) {
- 		elsif $huge eq 'wrap' && $t ~~ m/^(\N*?|\N**0..*)(.*?)/ {
+ 		elsif $huge eq 'wrap' && $t ~~ m/^(\N**0..*) <?{$0.chars ==$ll}>/ {
  			if $unexpand {
  				$r ~= unexpand($nl ~ $lead ~ $0);
 			}
@@ -76,9 +76,9 @@ sub wrap($ip,$xp,*@t) is export {
 			} else {
 				$remainder =  $separator;
 			}
-			$t = $1;
+			$t = $t.substr($0.chars);
 # 		} elsif ($huge eq 'overflow' && $t =~ /\G([^\n]*?)($break|\n+|\z)/xmgc) {
- 		} elsif ($huge eq 'overflow' && $t ~~ /(\N*?)($break|\n+|$)(.*)/) {
+ 		} elsif ($huge eq 'overflow' && $t ~~ /(\N*?)(<$break>|\n+|$)(.*)/) {
 			if  $unexpand {
  				$r ~= unexpand($nl ~ $lead ~ $0);
 			} else {
