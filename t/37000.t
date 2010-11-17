@@ -12,16 +12,16 @@ my $good =    "(1) Category\t(2 or greater) New Category\n";
 
 my $toprint;
 
-say "1..6";
+say "1..3";
 
 $Text::Wrap::break = rx{\s};
 $toPrint = wrap("","",$toPrint);
 #print $@ ? "not ok 1\n" : "ok 1\n";
 if $toPrint eq $good {
-	say "ok 2";
+	say "ok 1";
 }
 else {
-	say "not ok 2";
+	say "not ok 1";
 }
 
 
@@ -29,19 +29,19 @@ $Text::Wrap::break = rx{\d};
 $toPrint = wrap("","",$toPrint);
 # print $@ ? "not ok 3\n" : "ok 3\n";
 if $toPrint eq $good {
-	say "ok 4";
+	say "ok 2";
 }
 else {
-	say "not ok 4";
+	say "not ok 2";
 }
 $Text::Wrap::break = rx{a};
 $toPrint = wrap("","",$toPrint);
 # print $@ ? "not ok 5\n" : "ok 5\n";
 # print $toPrint eq $good ? "ok 6\n" : "not ok 6\n";
 if $toPrint eq $good {
-	say "ok 6";
+	say "ok 3";
 }
 else {
-	say "not ok 6";
+	say "not ok 3";
 }
 
