@@ -1,7 +1,7 @@
 lib/Text/Tabs.pm
 lib/Text/Wrap.pm
 MANIFEST
-META.yml                                 Module meta-data (added by MakeMaker)
+META.info
 README
 t/37000.t
 t/39548.t
