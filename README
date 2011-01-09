@@ -1,3 +1,5 @@
+Current status: Not finished
+
 Building Text::Tabs::Wrap
 
 $ ufo && make
