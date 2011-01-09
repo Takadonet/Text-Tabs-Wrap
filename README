@@ -1,3 +1,6 @@
+Building Text::Tabs::Wrap
+
+$ ufo && make
 
 Text::Tabs performs the same job that the unix expand(1) and unexpand(1)
 commands do: adding or removing tabs from a document.
