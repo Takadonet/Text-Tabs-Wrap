@@ -1,11 +1,12 @@
 use v6;
-
+use Test;
+plan 1;
 BEGIN {
         @*INC.push('lib');
 }
 use Text::Wrap;
 
-say "1..1";
+
 
 $Text::Wrap::columns = 1;
 #eval  wrap('', '', 'H4sICNoBwDoAA3NpZwA9jbsNwDAIRHumuC4NklvXTOD0KSJEnwU8fHz4Q8M9i3sGzkS7BBrm

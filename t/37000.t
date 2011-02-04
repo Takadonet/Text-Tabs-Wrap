@@ -1,4 +1,6 @@
 use v6;
+use Test;
+plan 3;
 BEGIN {
         @*INC.push('lib');
 }
@@ -12,36 +14,16 @@ my $good =    "(1) Category\t(2 or greater) New Category\n";
 
 my $toprint;
 
-say "1..3";
-
 $Text::Wrap::break = rx{\s};
 $toPrint = wrap("","",$toPrint);
-#print $@ ? "not ok 1\n" : "ok 1\n";
-if $toPrint eq $good {
-	say "ok 1";
-}
-else {
-	say "not ok 1";
-}
+is($toPrint,$good);
 
 
 $Text::Wrap::break = rx{\d};
 $toPrint = wrap("","",$toPrint);
-# print $@ ? "not ok 3\n" : "ok 3\n";
-if $toPrint eq $good {
-	say "ok 2";
-}
-else {
-	say "not ok 2";
-}
+is($toPrint,$good);
+
 $Text::Wrap::break = rx{a};
 $toPrint = wrap("","",$toPrint);
-# print $@ ? "not ok 5\n" : "ok 5\n";
-# print $toPrint eq $good ? "ok 6\n" : "not ok 6\n";
-if $toPrint eq $good {
-	say "ok 3";
-}
-else {
-	say "not ok 3";
-}
+is($toPrint,$good);
 

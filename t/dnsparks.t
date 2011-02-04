@@ -1,5 +1,6 @@
 use v6;
-
+use Test;
+plan 1;
 # #!/usr/bin/perl -I. -w
 
 # BEGIN {

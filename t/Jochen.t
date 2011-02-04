@@ -1,20 +1,13 @@
 use v6;
-
+use Test;
+plan 1;
 BEGIN {
 	@*INC.push('lib');
 }
 use Text::Wrap;
 
-say "1..1";
+
 
 $Text::Wrap::columns = 1;
 
-eval wrap('', '', '');
-
-if $! {
-	 say 'no ok';
-}
-else {
-	say 'ok 1';
-}	
-
+lives_ok({ wrap('', '', '') });

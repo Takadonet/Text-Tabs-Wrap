@@ -1,4 +1,5 @@
 use v6;
+use Test;
 BEGIN {
         @*INC.push('lib');
 }
@@ -81,14 +82,13 @@ Lines
 
 
 
-say "1..", 1 +@tests;
+plan 1 +@tests;
 
 use Text::Wrap;
 $Text::Wrap::separator2 = '=';
 
 
 
-my $tn = 1;
 
 my @st = @tests;
 while (@st) {
@@ -97,30 +97,7 @@ while (@st) {
 
         $in ~~ s/^TEST(\d+)?\n//;
 	my $back = wrap('   ', ' ', $in);
-
-	if ($back eq $out) {
-		print "ok $tn\n";
-	# } elsif ($rerun) {
-	# 	my $oi = $in;
-	# 	foreach ($in, $back, $out) {
-	# 		s/\t/^I\t/gs;
-	# 		s/\n/\$\n/gs;
-	# 	}
-	# 	print "------------ input ------------\n";
-	# 	print $in;
-	# 	print "\n------------ output -----------\n";
-	# 	print $back;
-	# 	print "\n------------ expected ---------\n";
-	# 	print $out;
-	# 	print "\n-------------------------------\n";
-	# 	$Text::Wrap::debug = 1;
-	# 	wrap('   ', ' ', $oi);
-	# 	exit(1);
-	} else {
-		print "not ok $tn\n";
-	}
-	$tn++;
-
+        is($back,$out);
 }
 
 @st = @tests;
@@ -139,41 +116,12 @@ while (@st) {
 	# # @in = ((map { "$_\n" } @in[0..$#in-1]), $in[-1]);
 	
         my $back = wrap('   ', ' ', @in);
-
-        
-	if ($back eq $out) {
- 		print "ok $tn\n";
-# 	} elsif ($rerun) {
-# 		my $oi = $in;
-# 		foreach ($in, $back, $out) {
-# 			s/\t/^I\t/gs;
-# 			s/\n/\$\n/gs;
-# 		}
-# 		print "------------ input2 ------------\n";
-# 		print $in;
-# 		print "\n------------ output2 -----------\n";
-# 		print $back;
-# 		print "\n------------ expected2 ---------\n";
-# 		print $out;
-# 		print "\n-------------------------------\n";
-# 		$Text::Wrap::debug = 1;
-# 		wrap('   ', ' ', $oi);
-# 		exit(1);
- 	} else {
- 		print "not ok $tn\n";
- 	}
- 	$tn++;
+        is($back,$out);
 }
 
 $Text::Wrap::huge = 'overflow';
 
 my $tw = 'This_is_a_word_that_is_too_long_to_wrap_we_want_to_make_sure_that_the_program_does_not_crash_and_burn';
 my $w = wrap('zzz','yyy',$tw);
-if $w eq "zzz$tw" {
-    say "ok $tn";
-}else {
-    say "not ok $tn";
-}
-
-$tn++;
+is($w,"zzz$tw");
 

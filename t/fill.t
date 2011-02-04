@@ -1,5 +1,6 @@
 use v6;
-
+use Test;
+plan 1;
 BEGIN {
         @*INC.push('lib');
 }
@@ -51,14 +52,11 @@ notes to see what we fixed! ",
 );
 
 
-print "1..";
-say @tests/2;
 
 use Text::Wrap;
 
 #$rerun = $ENV{'PERL_DL_NONLAZY'} ? 0 : 1;
 
-my $tn = 1;
 while (@tests) {
 	my $in = shift(@tests);
 	my $out = shift(@tests);
@@ -66,41 +64,5 @@ while (@tests) {
 	$in ~~ s/^TEST(\d+)?\n//;
 
 	my $back = fill('    ', ' ', $in);
-
-	if ($back eq $out) {
-		say "ok $tn";
-#	} elsif ($rerun) {
-#		my $oi = $in;
-#		write_file("#o", $back);
-#		write_file("#e", $out);
-#		for($in, $back, $out) -> $x{
-#			$x ~~s:g/\t/^I\t/;
-#			$x ~~ s:g/\n/\$\n/;
-#		}
-#		say "------------ input ------------";
-#		say $in;
-#		say "------------ output -----------";
-#		say $back;
-#		say "------------ expected ---------";
-#		say $out;
-#		say "-------------------------------";
-#		$Text::Wrap::debug = 1;
-#		fill('    ', ' ', $oi);
-#		exit(1);
-	} else {
-		print "not ok $tn\n";
-	}
-	$tn++;
+        is($back,$out);
 }
-
-#sub write_file
-#{
-#	my ($f, @data) = @_;
-
-#	local(*F);
-
-#	open(F, ">$f") || die "open >$f: $!";
-#	(print F @data) || die "write $f: $!";
-#	close(F) || die "close $f: $!";
-#	return 1;
-#}

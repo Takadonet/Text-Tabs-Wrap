@@ -1,12 +1,13 @@
 use v6;
-
+use Test;
+plan 1;
 # #!/usr/bin/perl -I.
 
 # # From: Dan Jacobson <jidanni at jidanni dot org>
 
 # use Text::Wrap qw(wrap $columns $huge $break);
 
-# print "1..1\n";
+
 
 # $huge='overflow';
 # $Text::Wrap::columns=9;

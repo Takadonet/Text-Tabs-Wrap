@@ -1,5 +1,5 @@
 use v6;
-
+use Test;
 BEGIN {
 	@*INC.push('lib');
 }
@@ -66,12 +66,12 @@ foobar                  IN	A		140.174.82.12
 ');
 
 
-say '1..' ~ @tests/2;
+plan @tests/2;
 use Text::Tabs;
 
 # $rerun = $ENV{'PERL_DL_NONLAZY'} ? 0 : 1;
 
-my $tn = 1;
+
 my $f;
 my $fn;
 while (@tests) {
@@ -96,26 +96,5 @@ while (@tests) {
 		$back = unexpand($in);
 	}
 
- 	if ($back eq $out) {
- 		print "ok $tn\n";
-# 	} elsif ($rerun) {
-# 		my $oi = $in;
-# 		foreach ($in, $back, $out) {
-# 			s/\t/^I\t/gs;
-# 			s/\n/\$\n/gs;
-# 		}
-# 		print "------------ input ------------\n";
-# 		print $in;
-# 		print "\$\n------------ $fn -----------\n";
-# 		print $back;
-# 		print "\$\n------------ expected ---------\n";
-# 		print $out;
-# 		print "\$\n-------------------------------\n";
-# 		$Text::Tabs::debug = 1;
-# 		my $back = &$f($in);
-# 		exit(1);
- 	} else {
- 		say "not ok $tn";
- 	}
- 	$tn++;
+        is($back,$out);
  }
