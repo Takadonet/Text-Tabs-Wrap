@@ -1,11 +1,7 @@
 module Text::Tabs {
 
-#require Exporter;
-#@ISA = (Exporter);
-#@EXPORT = qw(expand unexpand $tabstop);
 
 #use vars qw($VERSION $tabstop $debug);
-#$VERSION = 2009.0305;
 
 #BEGIN	{
 	our $tabstop = 8;
@@ -14,17 +10,17 @@ module Text::Tabs {
 sub expand(*@in) is export {
 	my @l;
 	my $pad;
-	for(@in) -> $x  {
+	for (@in) -> $x  {
 		my $s = '';
 		my @matchs = $x.comb(/^^\N*\n?/);
-		for (@matchs) -> $y{
+		for (@matchs) -> $y {
 			my $offs = 0;
 			my $tmp = $y;
 			
 			#need to find position of all /t so we can calculate the position when we replace them
 			my @a = $tmp.split(/\t/,:all);
 			my @pos;
-			for(@a) -> $x {
+			for (@a) -> $x {
 				if  $x.WHAT ~~ Match {
 					 @pos.push($x.from);
 				}
