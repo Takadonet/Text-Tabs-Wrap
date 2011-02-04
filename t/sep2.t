@@ -124,7 +124,7 @@ while (@st) {
 }
 
 @st = @tests;
-while(@st) {
+while (@st) {
 	my $in = shift(@st);
 	my $out = shift(@st);
 

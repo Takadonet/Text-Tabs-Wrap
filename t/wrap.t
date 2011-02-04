@@ -158,7 +158,7 @@ my @st = @tests;
 $Text::Wrap::break = rx{\s};
 
 @st = @tests;
-while(@st) {
+while (@st) {
  	my $in = shift(@st);
  	my $out = shift(@st);
 
