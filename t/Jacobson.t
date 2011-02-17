@@ -1,27 +1,22 @@
+#!/usr/bin/env perl6
 use v6;
 use Test;
-plan 1;
-# #!/usr/bin/perl -I.
+use Text::Wrap;
 
-# # From: Dan Jacobson <jidanni at jidanni dot org>
+my @input = (
+    "mmmm,n,ooo,ppp.qqqq.rrrrr,sssssssssssss,ttttttttt,uu,vvv wwwwwwwww####\n",
+    "mmmm,n,ooo,ppp.qqqq.rrrrr.adsljasdf\nlasjdflajsdflajsdfljasdfl\nlasjdflasjdflasf,sssssssssssss,ttttttttt,uu,vvv wwwwwwwww####\n"
+);
 
-# use Text::Wrap qw(wrap $columns $huge $break);
+plan +@input;
 
+$Text::Wrap::huge = 'overflow';
+$Text::Wrap::columns = 9;
+$Text::Wrap::break = '(?<=[,.])';
 
+skip_rest 'Need to translate the $break into p6-regex';
+exit;
 
-# $huge='overflow';
-# $Text::Wrap::columns=9;
-# $break="(?<=[,.])";
-# eval {
-# $a=$a=wrap('','',
-# "mmmm,n,ooo,ppp.qqqq.rrrrr,sssssssssssss,ttttttttt,uu,vvv wwwwwwwww####\n");
-# };
-
-# if ($@) {
-# 	my $e = $@;
-# 	$e =~ s/^/# /gm;
-# 	print $e;
-# }
-# print $@ ? "not ok 1\n" : "ok 1\n";
-
-
+for @input -> $str {
+    lives_ok { wrap('', '', $str) }
+}

@@ -18,14 +18,14 @@ our Bool $unexpand = True;  #='Whether to compress leading indent into tabs afte
 our Str $separator = "\n";  #='String used to join wrapped "lines"'
 our Str $separator2;        #='String used to join lines, which preserves $separator if set'
 
-sub wrap(Str $para-indent, Str $line-indent, *@t) is export {
+sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
     #local($Text::Tabs::tabstop) = $tabstop;
-    my $tail = pop(@t);
-    #my $t = expand(join("", (map { /\s+\z/ ? ( $_ ) : ($_, ' ') } @t), $tail));
+    my $tail = pop(@texts);
+    #my $t = expand(join("", (map { /\s+\z/ ? ( $_ ) : ($_, ' ') } @texts), $tail));
 
     # WTF does this varname mean?
     my @yo;
-    for @t -> $x {
+    for @texts -> $x {
         if $x ~~ /\s+$/ {
             @yo.push($x);
         }
@@ -37,7 +37,8 @@ sub wrap(Str $para-indent, Str $line-indent, *@t) is export {
 
     my $t = expand($line);
     my $lead = $para-indent;
-    #todo replace with .graphs when implemented
+
+    # TODO: replace with .graphs sometime
     my Int $nll = $columns - expand($line-indent).chars - 1;
 
     if $nll <= 0 && $line-indent ne '' {
@@ -80,7 +81,7 @@ sub wrap(Str $para-indent, Str $line-indent, *@t) is export {
             }
             $t = $t.substr($0.chars);
         #} elsif ($huge eq 'overflow' && $t =~ /\G([^\n]*?)($break|\n+|\z)/xmgc) {
-        } elsif ($huge eq 'overflow' && $t ~~ /(\N*?)(<$break>|\n+|$)(.*)/) {
+        } elsif ($huge eq 'overflow' && $t ~~ m/(\N*?)(<$break>|\n+|$)(.*)/) {
             if $unexpand {
                 $r ~= unexpand($nl ~ $lead ~ $0);
             } else {
@@ -92,9 +93,9 @@ sub wrap(Str $para-indent, Str $line-indent, *@t) is export {
         elsif $huge eq 'die' {
             die "couldn't wrap '$t'";
         } elsif $columns < 2 {
-            #warnings::warnif "Increasing \$Text::Wrap::columns from $columns to 2";
+            warn "Increasing \$Text::Wrap::columns from $columns to 2";
             $columns = 2;
-            return ($para-indent, $line-indent, @t);
+            return ($para-indent, $line-indent, @texts);
         } else {
             die "This shouldn't happen";
         }
@@ -293,3 +294,5 @@ sub fill(Str $para-indent, Str $line-indent, *@raw) is export {
 # This module may be modified, used, copied, and redistributed at
 # your own risk.  Publicly redistributed versions that are modified
 # must use a different name.
+
+# vim: set ft=perl6 :

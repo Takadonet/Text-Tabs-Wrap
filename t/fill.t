@@ -1,14 +1,16 @@
+#!/usr/bin/env perl6
 use v6;
 use Test;
-plan 1;
+use Text::Wrap;
+
 BEGIN {
-        @*INC.push('lib');
+    @*INC.push('lib');
 }
 
+plan 1;
 
-my @tests = (
-"TEST1
-Cyberdog Information
+my $input =
+"Cyberdog Information
 
 Cyberdog & Netscape in the news
 Important Press Release regarding Cyberdog and Netscape. Check it out! 
@@ -31,8 +33,9 @@ We hope that Cyberdog and OpenDoc 1.1 will be available within the next
 two weeks. In the meantime, we have released another version of
 Cyberdog, Cyberdog 1.1 Beta 3. This version fixes several bugs that were
 reported to us during out public beta period. You can check out our release
-notes to see what we fixed! ",
+notes to see what we fixed! ";
 
+my $output =
 "    Cyberdog Information
     Cyberdog & Netscape in the news Important Press Release regarding
  Cyberdog and Netscape. Check it out! 
@@ -48,21 +51,7 @@ notes to see what we fixed! ",
  available within the next two weeks. In the meantime, we have released
  another version of Cyberdog, Cyberdog 1.1 Beta 3. This version fixes
  several bugs that were reported to us during out public beta period. You
- can check out our release notes to see what we fixed! "
-);
+ can check out our release notes to see what we fixed! ";
 
-
-
-use Text::Wrap;
-
-#$rerun = $ENV{'PERL_DL_NONLAZY'} ? 0 : 1;
-
-while (@tests) {
-	my $in = shift(@tests);
-	my $out = shift(@tests);
-
-	$in ~~ s/^TEST(\d+)?\n//;
-
-	my $back = fill('    ', ' ', $in);
-        is($back,$out);
-}
+is  fill('    ', ' ', $input),
+    $output;

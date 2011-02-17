@@ -1,6 +1,15 @@
+#!/usr/bin/env perl6
 use v6;
 use Test;
+use Text::Wrap;
+
+BEGIN {
+    @*INC.push('lib');
+}
+
 plan 1;
+skip 1 => 'Perl 5 performance regression test - not really applicable here';
+
 # #!/usr/bin/perl -I. -w
 
 # BEGIN {

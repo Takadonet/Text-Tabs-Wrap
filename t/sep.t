@@ -1,7 +1,10 @@
+#!/usr/bin/env perl6
 use v6;
 use Test;
+use Text::Wrap;
+
 BEGIN {
-        @*INC.push('lib');
+    @*INC.push('lib');
 }
 
 ##warning watch out when uncommenting comments symbol for @tests
@@ -64,43 +67,32 @@ Lines
 );
 
 
-plan (1 +@tests);
+plan 1 + @tests;
 
-use Text::Wrap;
 $Text::Wrap::separator = '=';
 
+for @tests -> $in is copy, $out {
+    $in ~~ s/^TEST\d*\n//;
 
+    # Test single string usage
+    is  wrap('   ', ' ', $in),
+        $out;
 
-my @st = @tests;
-while (@st) {
- 	my $in = shift(@st);
- 	my $out = shift(@st);
+    # Test multiple string usage
+    my @in = $in.split(/\n/);
 
- 	$in ~~ s/^TEST(\d+)?\n//;
+    # append "\n" to all entries but the last
+    @in[0 ..^ @in-1] >>~=>> "\n";
 
- 	my $back = wrap('   ', ' ', $in);
-        is($back,$out);
-        
-
+    is  wrap('   ', ' ', @in),
+        $out;
 }
 
-@st = @tests;
-while (@st) {
-	my $in = shift(@st);
-	my $out = shift(@st);
-
-	$in ~~ s/^TEST(\d+)?\n//;
-        my @in = $in.split(/\n/);
-        
-        #append "\n" to all entries but the last
-        @in[0 ..^ @in-1] >>~=>> "\n";
-	
-	my $back = wrap('   ', ' ', @in);
-        is($back,$out);
-
-}
-
+# XXX This one seems to be identical across several files, do we really need it in them all?
 $Text::Wrap::huge = 'overflow';
-my $tw = 'This_is_a_word_that_is_too_long_to_wrap_we_want_to_make_sure_that_the_program_does_not_crash_and_burn';
-my $w = wrap('zzz','yyy',$tw);
-is($w,"zzz$tw");
+my $tw = <
+    This is a word that is too long to wrap to make sure that the program does not crash and burn
+>.join('_');
+
+is  wrap('zzz', 'yyy', $tw),
+    "zzz$tw";

@@ -1,7 +1,10 @@
+#!/usr/bin/env perl6
 use v6;
 use Test;
+use Text::Wrap;
+
 BEGIN {
-        @*INC.push('lib');
+    @*INC.push('lib');
 }
 
 # #!/usr/bin/perl -I.
@@ -80,48 +83,32 @@ Lines
 "
 );
 
-
-
 plan 1 +@tests;
 
-use Text::Wrap;
 $Text::Wrap::separator2 = '=';
 
-
-
-
-my @st = @tests;
-while (@st) {
-	my $in = shift(@st);
-	my $out = shift(@st);
-
-        $in ~~ s/^TEST(\d+)?\n//;
-	my $back = wrap('   ', ' ', $in);
-        is($back,$out);
+for @tests -> $in is copy, $out {
+    $in ~~ s/^TEST(\d+)?\n//;
+    my $back = wrap('   ', ' ', $in);
+    is($back,$out);
 }
 
-@st = @tests;
-while (@st) {
-	my $in = shift(@st);
-	my $out = shift(@st);
+for @tests -> $in is copy, $out {
+    $in ~~ s/^TEST(\d+)?\n//;
 
-	$in ~~ s/^TEST(\d+)?\n//;
+    my @in = $in.split(/\n/);
 
-        my @in = $in.split(/\n/);
-        
-        #append "\n" to all entries but the last
-        @in[0 ..^ @in-1] >>~=>> "\n";
-        
-	# # my @in = split("\n", $in, -1);
-	# # @in = ((map { "$_\n" } @in[0..$#in-1]), $in[-1]);
-	
-        my $back = wrap('   ', ' ', @in);
-        is($back,$out);
+    #append "\n" to all entries but the last
+    @in[0 ..^ @in-1] >>~=>> "\n";
+
+    my $back = wrap('   ', ' ', @in);
+    is($back, $out);
 }
 
 $Text::Wrap::huge = 'overflow';
+my $tw = <
+    This is a word that is too long to wrap to make sure that the program does not crash and burn
+>.join('_');
 
-my $tw = 'This_is_a_word_that_is_too_long_to_wrap_we_want_to_make_sure_that_the_program_does_not_crash_and_burn';
-my $w = wrap('zzz','yyy',$tw);
-is($w,"zzz$tw");
-
+is  wrap('zzz', 'yyy', $tw),
+    "zzz$tw";

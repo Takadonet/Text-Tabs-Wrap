@@ -1,3 +1,4 @@
+#!/usr/bin/env perl6
 use v6;
 use Test;
 use Text::Wrap;
@@ -6,6 +7,7 @@ BEGIN {
     @*INC.push('lib');
 }
 
+# Get list of input files from the test directory
 my $basepath = do {
     my $parts = $*PROGRAM_NAME.split('/');
     $parts.pop;
@@ -14,13 +16,18 @@ my $basepath = do {
 
 my @tests = dir($basepath ~ '/wrap.t.input');
 
-plan 2 +@tests;
+plan 3 +@tests;
+
+is  +@tests,
+    +dir($basepath ~ '/wrap.t.output'),
+    'Sanity check: number of input files = output files';
 
 for @tests -> $filename {
     my @in = open("$basepath/wrap.t.input/$filename").lines;
     my @out = open("$basepath/wrap.t.output/$filename").lines;
 
-    # Scan output file for formatting instructions
+    # Scan output file for formatting instructions -
+    # the only one currently used is a "### break=<$regex>" line
     if @out[0] ~~ / ^'###' / {
         for @out.shift.words {
             when /'break=' (\N+)/ {

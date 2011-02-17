@@ -1,18 +1,26 @@
+#!/usr/bin/env perl6
 use v6;
+use Test;
+use Text::Wrap;
+
 BEGIN {
-        @*INC.push('lib');
+    @*INC.push('lib');
 }
 
-use Text::Wrap;
-use Test;
+plan 2;
 
-plan 1;
 $Text::Wrap::columns = 4;
+
 my $x;
 
-eval  $x =wrap('', '123', 'some text');
+todo 1 => 'lives_ok declares a warn() as test failure, we only want to know about fatal errors';
+lives_ok {
+    $x = wrap('', '123', 'some text');
+}
 
-#todo figure out how to test for this
-#is(~$!, '');
-is($x, "some\n123t\n123e\n123x\n123t","Correct output");
+# Set it anyway
+$x = wrap('', '123', 'some text');
 
+is  $x,
+    "some\n123t\n123e\n123x\n123t",
+    'Correct output';
