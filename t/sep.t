@@ -7,20 +7,19 @@ BEGIN {
     @*INC.push('lib');
 }
 
-my $basepath = do given $*PROGRAM_NAME.split('/') { .pop; .join('/') || '.' };
-my @tests = dir($basepath ~ '/sep.t.output');
+my @tests = dir("$*PROGRAM_NAME.output");
 
 plan 2 + @tests * 2;
 
-is  +dir($basepath ~ '/sep.t.input'),
+is  +dir("$*PROGRAM_NAME.input"),
     +@tests,
     'Sanity check: number of input files = output files';
 
 $Text::Wrap::separator = '=';
 
 for @tests -> $filename {
-    my $in = open("$basepath/sep.t.input/$filename").slurp;
-    my $out = open("$basepath/sep.t.output/$filename").slurp;
+    my $in = open("$*PROGRAM_NAME.input/$filename").slurp;
+    my $out = open("$*PROGRAM_NAME.output/$filename").slurp;
 
     # Test single string usage
     is  wrap('   ', ' ', $in),
@@ -36,7 +35,6 @@ for @tests -> $filename {
         $out;
 }
 
-# XXX This one seems to be identical across several files, do we really need it in them all?
 $Text::Wrap::huge = 'overflow';
 my $tw = <
     This is a word that is too long to wrap to make sure that the program does not crash and burn
