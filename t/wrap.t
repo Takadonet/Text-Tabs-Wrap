@@ -8,12 +8,7 @@ BEGIN {
 }
 
 # Get list of input files from the test directory
-my $basepath = do {
-    my $parts = $*PROGRAM_NAME.split('/');
-    $parts.pop;
-    $parts.join('/') || '.';
-};
-
+my $basepath = do given $*PROGRAM_NAME.split('/') { .pop; .join('/') || '.' };
 my @tests = dir($basepath ~ '/wrap.t.input');
 
 plan 3 +@tests;
