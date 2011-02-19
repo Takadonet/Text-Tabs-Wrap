@@ -7,19 +7,17 @@ BEGIN {
     @*INC.push('lib');
 }
 
-# Get list of input files from the test directory
-my $basepath = do given $*PROGRAM_NAME.split('/') { .pop; .join('/') || '.' };
-my @tests = dir($basepath ~ '/wrap.t.input');
+my @tests = dir("$*PROGRAM_NAME.output");
 
-plan 3 +@tests;
+plan 3 + @tests;
 
-is  +@tests,
-    +dir($basepath ~ '/wrap.t.output'),
+is  +dir("$*PROGRAM_NAME.input"),
+    +@tests,
     'Sanity check: number of input files = output files';
 
 for @tests -> $filename {
-    my @in = open("$basepath/wrap.t.input/$filename").lines;
-    my @out = open("$basepath/wrap.t.output/$filename").lines;
+    my @in = open("$*PROGRAM_NAME.input/$filename").lines;
+    my @out = open("$*PROGRAM_NAME.output/$filename").lines;
 
     # Scan output file for formatting instructions -
     # the only one currently used is a "### break=<$regex>" line
@@ -31,12 +29,12 @@ for @tests -> $filename {
             }
         }
     }
+    else {
+        $Text::Wrap::break = rx{\s};
+    }
 
     is  wrap('   ', ' ', @in.join("\n")),
         @out.join("\n");
-
-    # Reset this to default if it got changed above
-    $Text::Wrap::break = rx{\s};
 }
 
 # Overflow test
