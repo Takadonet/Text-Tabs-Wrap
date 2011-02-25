@@ -10,28 +10,11 @@ our #`[Str] $separator = "\n";  # String used to join wrapped "lines"
 our #`[Str] $separator2;        # String used to join lines, which preserves $separator if set
 
 sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
-    #local($Text::Tabs::tabstop) = $tabstop;
     my $tail = pop(@texts);
-    #my $t = expand(join("", (map { /\s+\z/ ? ( $_ ) : ($_, ' ') } @texts), $tail));
-
-    # WTF does this varname mean?
-    my @yo;
-    for @texts -> $x {
-        if $x ~~ /\s+$/ {
-            @yo.push($x);
-        }
-        else {
-            @yo.push($x ~ ' ');
-        }
-    }
-    my $line = @yo.join ~ $tail;
-
-    my $t = expand($line);
+    my $t = expand(@texts.map({ /\s+$/ ?? $_ !! $_ ~ ' ' }).join ~ $tail);
     my $lead = $para-indent;
 
-    # TODO: replace with .graphs sometime
     my $nll = $columns - expand($line-indent).chars - 1;
-
     if $nll <= 0 && $line-indent ne '' {
         my $nc = expand($line-indent).chars + 2;
         warn "\$Text::Wrap::columns is too small; increasing it from $columns to $nc";
@@ -43,50 +26,37 @@ sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
     my $out = '';
     my $nl = '';
     my $remainder = '';
+
+    sub unexpand-if { $unexpand ?? unexpand($^a) !! $^a }
+
     while $t !~~ m/^\s*$/ {
+        # Look for a word less than the maximum line length
         if $t ~~ m/^(\N**0..*) <?{$0.chars <= $ll}> (<$break>|\n+|$)(.*)/ {
-            if $unexpand {
-                $out ~= unexpand($nl ~ $lead ~ $0);
-            }
-            else {
-                $out ~= $nl ~ $lead ~ $0;
-            }
+            $out ~= unexpand-if($nl ~ $lead ~ $0);
             $remainder = $1;
             $t = $2;
         }
-        #elsif $huge eq 'wrap' && $t =~ /\G([^\n]{$ll})/gc)
-        elsif $huge eq 'wrap' && $t ~~ m/^(\N**0..*) <?{$0.chars == $ll}>/ {
-            if $unexpand {
-                $out ~= unexpand($nl ~ $lead ~ $0);
-            }
-            else {
-                $out ~= $nl ~ $lead ~ $0;
-            }
-            if $separator2 {
-                $remainder = $separator2;
-            } else {
-                $remainder = $separator;
-            }
+        # If that fails, try to handle the word according to $Text::Wrap::huge
+        elsif $huge eq 'wrap' and $t ~~ m/^(\N**0..*) <?{$0.chars == $ll}>/ {
+            $out ~= unexpand-if($nl ~ $lead ~ $0);
+            $remainder = ($separator2 or $separator);
             $t = $t.substr($0.chars);
         }
-        #elsif ($huge eq 'overflow' && $t =~ /\G([^\n]*?)($break|\n+|\z)/xmgc)
-        elsif ($huge eq 'overflow' && $t ~~ m/(\N*?)(<$break>|\n+|$)(.*)/) {
-            if $unexpand {
-                $out ~= unexpand($nl ~ $lead ~ $0);
-            } else {
-                $out ~= $nl ~ $lead ~ $0;
-            }
+        elsif $huge eq 'overflow' and $t ~~ m/(\N*?)(<$break>|\n+|$)(.*)/ {
+            $out ~= unexpand-if($nl ~ $lead ~ $0);
             $remainder = $1;
             $t = $2;
         }
         elsif $huge eq 'die' {
-            die "couldn't wrap '$t'";
+            die "Couldn't wrap '$t' - word is longer than requested text width $columns";
         }
+        # Attempt to recover if the user asked for unreasonably small wrap width
         elsif $columns < 2 {
-            warn "Increasing \$Text::Wrap::columns from $columns to 2";
+            warn "Failed to wrap with text width set to $columns, retrying with 2";
             $columns = 2;
-            return ($para-indent, $line-indent, @texts);
+            return wrap($para-indent, $line-indent, @texts);
         }
+        # If all else fails...
         else {
             die "This shouldn't happen";
         }
@@ -95,12 +65,8 @@ sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
         $ll = $nll;
 
         if $separator2 {
-            $nl = $remainder;
-        }
-
-        if $separator2 {
             if $remainder eq "\n" {
-                $nl = "\n";
+                $nl = $remainder;
             }
             else {
                 $nl = $separator2;
