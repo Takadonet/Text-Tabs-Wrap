@@ -1,6 +1,4 @@
 #!/usr/bin/env perl6
-# FIXME: Is this from RT#37000? There's an external link there that seems to be dead, but other than
-# that I can't find any mention of this there
 use v6;
 use Test;
 use Text::Wrap;
@@ -9,19 +7,28 @@ BEGIN {
     @*INC.push('lib');
 }
 
-plan 3;
+# This test re-wraps a short string repeatedly with different settings for $break - the output
+# should be the same each time
+# FIXME: Is this from RT#37000? There's an external link there that seems to be dead, but other than
+# that I can't find any mention of this there
 
-my $toPrint = "(1) Category\t(2 or greater) New Category\n\n";
-my $good =    "(1) Category\t(2 or greater) New Category\n";
+my Str $input = "(1) Category\t(2 or greater) New Category\n\n";
+my Str $output = "(1) Category\t(2 or greater) New Category\n";
+my @steps = (
+    rx{\s},
+    rx{\d},
+    rx{a},
+);
 
-$Text::Wrap::break = rx{\s};
-$toPrint = wrap('', '', $toPrint);
-is $toPrint, $good;
+plan +@steps;
 
-$Text::Wrap::break = rx{\d};
-$toPrint = wrap('', '', $toPrint);
-is $toPrint, $good;
+my Str $current = $input;
 
-$Text::Wrap::break = rx{a};
-$toPrint = wrap('', '', $toPrint);
-is $toPrint, $good;
+for @steps.kv -> $number, $regex {
+    $Text::Wrap::break = $regex;
+    $current = wrap('', '', $current);
+
+    is  $current,
+        $output,
+        "Short line \$break test ({1+$number} of {+@steps})";
+}

@@ -12,11 +12,9 @@ plan +@input;
 
 $Text::Wrap::huge = 'overflow';
 $Text::Wrap::columns = 9;
-$Text::Wrap::break = '(?<=[,.])';
+$Text::Wrap::break = rx{<?after <[,.]>>};
 
-skip_rest 'Need to translate the $break into p6-regex';
-exit;
-
-for @input -> $str {
+for @input.kv -> $num, $str {
+    todo (1+$num) => '<?after> NYI in Rakudo';
     lives_ok { wrap('', '', $str) }
 }

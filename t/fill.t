@@ -1,5 +1,6 @@
 #!/usr/bin/env perl6
 use v6;
+use TestFiles;
 use Test;
 use Text::Wrap;
 
@@ -7,19 +8,6 @@ BEGIN {
     @*INC.push('lib');
 }
 
-my @tests = dir("$*PROGRAM_NAME.output");
-
-plan 1 + @tests;
-
-is  +dir("$*PROGRAM_NAME.input"),
-    +@tests,
-    'Sanity check: number of input files = output files';
-
-for @tests -> $filename {
-    my $in = open("$*PROGRAM_NAME.input/$filename").slurp;
-    my $out = open("$*PROGRAM_NAME.output/$filename").slurp;
-
-    is  fill('    ', ' ', $in),
-        $out,
-        $filename;
-}
+TestFiles::run(sub ($in, $out, $filename) {
+    is fill(' ' x 4, ' ', $in.slurp), $out.slurp, $filename;
+});

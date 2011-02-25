@@ -7,18 +7,19 @@ BEGIN {
     @*INC.push('lib');
 }
 
+# Test that $columns set too short is expanded automatically and emits a warning
+
 plan 2;
+todo 1 => 'lives_ok declares a warn() as test failure, we only want to know about fatal errors';
 
 $Text::Wrap::columns = 4;
 
 my $x;
-
-todo 1 => 'lives_ok declares a warn() as test failure, we only want to know about fatal errors';
 lives_ok {
     $x = wrap('', '123', 'some text');
 }
 
-# Set it anyway
+# Set it anyway because of the above TODO
 $x = wrap('', '123', 'some text');
 
 is  $x,

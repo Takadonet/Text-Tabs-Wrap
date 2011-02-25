@@ -7,13 +7,15 @@ BEGIN {
     @*INC.push('lib');
 }
 
+# Test that columns=1 works correctly
+
 plan 1;
-todo 1 => 'known bug - this one goes into an infinite loop';
+todo 1 => 'columns=1 goes into an infinite loop';
 
 $Text::Wrap::columns = 1;
 
 lives_ok {
-    die;
+    die "TODO";
     wrap('', '',
     'H4sICNoBwDoAA3NpZwA9jbsNwDAIRHumuC4NklvXTOD0KSJEnwU8fHz4Q8M9i3sGzkS7BBrm
     OkCTwsycb4S3DloZuMIYeXpLFqw5LaMhXC2ymhreVXNWMw9YGuAYdfmAbwomoPSyFJuFn2x8
