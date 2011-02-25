@@ -63,18 +63,9 @@ sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
 
         $lead = $line-indent;
         $ll = $nll;
-
-        if $separator2 {
-            if $remainder eq "\n" {
-                $nl = $remainder;
-            }
-            else {
-                $nl = $separator2;
-            }
-        }
-        else {
-            $nl = $separator;
-        }
+        $nl = $separator2 ?? $remainder eq "\n" ?? $remainder
+                                                !! $separator2
+                          !! $separator;
     }
 
     return $out ~ $remainder;
