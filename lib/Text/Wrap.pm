@@ -1,9 +1,6 @@
 module Text::Wrap;
 use Text::Tabs;
 
-my regex break { \s };
-our #`[Bool] $debug = False;    # Makes wrap() extra-noisy
-
 our $break = rx{\s};
 our $huge = 'wrap';             # How to handle long words; valid values are <wrap die overflow>
 our #`[Int] $columns = 76;      # Screen width
@@ -43,16 +40,16 @@ sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
     }
 
     my $ll = [max] 0, $columns - expand($para-indent).chars - 1;
-    my $r = '';
+    my $out = '';
     my $nl = '';
     my $remainder = '';
     while $t !~~ m/^\s*$/ {
         if $t ~~ m/^(\N**0..*) <?{$0.chars <= $ll}> (<$break>|\n+|$)(.*)/ {
             if $unexpand {
-                $r ~= unexpand($nl ~ $lead ~ $0);
+                $out ~= unexpand($nl ~ $lead ~ $0);
             }
             else {
-                $r ~= $nl ~ $lead ~ $0;
+                $out ~= $nl ~ $lead ~ $0;
             }
             $remainder = $1;
             $t = $2;
@@ -60,10 +57,10 @@ sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
         #elsif $huge eq 'wrap' && $t =~ /\G([^\n]{$ll})/gc)
         elsif $huge eq 'wrap' && $t ~~ m/^(\N**0..*) <?{$0.chars == $ll}>/ {
             if $unexpand {
-                $r ~= unexpand($nl ~ $lead ~ $0);
+                $out ~= unexpand($nl ~ $lead ~ $0);
             }
             else {
-                $r ~= $nl ~ $lead ~ $0;
+                $out ~= $nl ~ $lead ~ $0;
             }
             if $separator2 {
                 $remainder = $separator2;
@@ -71,13 +68,13 @@ sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
                 $remainder = $separator;
             }
             $t = $t.substr($0.chars);
-        #elsif ($huge eq 'overflow' && $t =~ /\G([^\n]*?)($break|\n+|\z)/xmgc)
         }
+        #elsif ($huge eq 'overflow' && $t =~ /\G([^\n]*?)($break|\n+|\z)/xmgc)
         elsif ($huge eq 'overflow' && $t ~~ m/(\N*?)(<$break>|\n+|$)(.*)/) {
             if $unexpand {
-                $r ~= unexpand($nl ~ $lead ~ $0);
+                $out ~= unexpand($nl ~ $lead ~ $0);
             } else {
-                $r ~= $nl ~ $lead ~ $0;
+                $out ~= $nl ~ $lead ~ $0;
             }
             $remainder = $1;
             $t = $2;
@@ -113,16 +110,19 @@ sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
             $nl = $separator;
         }
     }
-    $r ~= $remainder;
 
-    return $r;
+    return $out ~ $remainder;
 }
 
+# Rewraps paragraphs, discarding original space. A paragraph is detected by leading indent on the
+# first line. If para-indent is the same as line-indent, paragraphs are separated by blank lines.
 sub fill(Str $para-indent, Str $line-indent, *@raw) is export {
-    # if paragraph_indent is the same as line_indent, paragraphs are separated with blank lines
-    @raw.join("\n").split(/\n\s+/).map({
-        wrap($para-indent, $line-indent, $^line.split(/\s+/).join(' '));
-    }).join( $para-indent eq $line-indent ?? "\n\n" !! "\n" );
+    @raw.join("\n")\
+        .split(/\n\s+/)\
+        .map({
+            wrap($para-indent, $line-indent, $^paragraph.split(/\s+/).join(' '))
+        })\
+        .join($para-indent eq $line-indent ?? "\n\n" !! "\n");
 }
 
 # =head1 NAME
