@@ -1,7 +1,5 @@
 module Text::Tabs:ver<*>;
 
-#use vars qw($VERSION $tabstop $debug);
-
 our Int $tabstop = 8;
 our Bool $debug = False;
 

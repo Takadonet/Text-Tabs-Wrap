@@ -1,12 +1,6 @@
 module Text::Wrap:ver<*>;
 use Text::Tabs;
 
-# use Text::Tabs qw(expand unexpand);
-# @ISA = qw(Exporter);
-# @EXPORT = qw(wrap fill);
-# @EXPORT_OK = qw($columns $break $huge);
-# $VERSION = 2009.0305;
-
 my regex break { \s };
 our Bool $debug = False;    #='Makes wrap() extra-noisy'
 
@@ -51,7 +45,7 @@ sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
         $nll = 1;
     }
 
-    my Int $ll = 0 max $columns - expand($para-indent).chars - 1;
+    my Int $ll = [max] 0, $columns - expand($para-indent).chars - 1;
     my $r = '';
     my $nl = '';
     my $remainder = '';
@@ -66,7 +60,7 @@ sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
             $remainder = $1;
             $t = $2;
         }
-        #elsif $huge eq 'wrap' && $t =~ /\G([^\n]{$ll})/gc) {
+        #elsif $huge eq 'wrap' && $t =~ /\G([^\n]{$ll})/gc)
         elsif $huge eq 'wrap' && $t ~~ m/^(\N**0..*) <?{$0.chars == $ll}>/ {
             if $unexpand {
                 $r ~= unexpand($nl ~ $lead ~ $0);
@@ -80,8 +74,9 @@ sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
                 $remainder = $separator;
             }
             $t = $t.substr($0.chars);
-        #} elsif ($huge eq 'overflow' && $t =~ /\G([^\n]*?)($break|\n+|\z)/xmgc) {
-        } elsif ($huge eq 'overflow' && $t ~~ m/(\N*?)(<$break>|\n+|$)(.*)/) {
+        #elsif ($huge eq 'overflow' && $t =~ /\G([^\n]*?)($break|\n+|\z)/xmgc)
+        }
+        elsif ($huge eq 'overflow' && $t ~~ m/(\N*?)(<$break>|\n+|$)(.*)/) {
             if $unexpand {
                 $r ~= unexpand($nl ~ $lead ~ $0);
             } else {
@@ -92,11 +87,13 @@ sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
         }
         elsif $huge eq 'die' {
             die "couldn't wrap '$t'";
-        } elsif $columns < 2 {
+        }
+        elsif $columns < 2 {
             warn "Increasing \$Text::Wrap::columns from $columns to 2";
             $columns = 2;
             return ($para-indent, $line-indent, @texts);
-        } else {
+        }
+        else {
             die "This shouldn't happen";
         }
 
@@ -110,7 +107,8 @@ sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
         if $separator2 {
             if $remainder eq "\n" {
                 $nl = "\n";
-            } else {
+            }
+            else {
                 $nl = $separator2;
             }
         }
@@ -119,18 +117,6 @@ sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
         }
     }
     $r ~= $remainder;
-
-    print "-----------$r---------\n" if $debug;
-
-    print "Finish up with '$lead'\n" if $debug;
-
-    #$r .= $lead . substr($t, pos($t), length($t)-pos($t))
-    #   if pos($t) ne length($t);
-    #if pos($t) ne length($t) {
-    #   $r ~= $lead ~ substr($t, pos($t), $t.chars -pos($t) );
-    #}
-
-    print "-----------$r---------\n" if $debug;
 
     return $r;
 }
@@ -148,9 +134,6 @@ sub fill(Str $para-indent, Str $line-indent, *@raw) is export {
     # separate paragraphs with blank lines
     return @para.join( $para-indent eq $line-indent ?? "\n\n" !! "\n" );
 }
-
-# 1;
-# __END__
 
 # =head1 NAME
 
