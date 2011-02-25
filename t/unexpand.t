@@ -1,7 +1,7 @@
 #!/usr/bin/env perl6
 use v6;
 use Test;
-use Text::Wrap;
+use Text::Tabs;
 
 BEGIN {
     @*INC.push('lib');
@@ -19,6 +19,6 @@ for @tests -> $filename {
     my $in = open("$*PROGRAM_NAME.input/$filename").slurp;
     my $out = open("$*PROGRAM_NAME.output/$filename").slurp;
 
-    is  fill('    ', ' ', $in),
+    is  unexpand($in),
         $out;
 }
