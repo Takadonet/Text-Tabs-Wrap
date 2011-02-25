@@ -7,11 +7,16 @@ BEGIN {
     @*INC.push('lib');
 }
 
-plan 1;
+# Test that $separator2 breaks existing lines without removing any existing chars
+
+plan 2;
 
 $Text::Wrap::columns = 15;
 $Text::Wrap::separator2 = '[N]';
 
 is  wrap('', '', 'some long text here that should be wrapped on at least three lines'),
-    "some long text[N]here that[N]should be[N]wrapped on at[N]least three[N]lines",
-    'If you just want to preserve existing newlines but add new breaks with something else, set $Text::Wrap::separator2 instead.';
+    "some long text[N]here that[N]should be[N]wrapped on at[N]least three[N]lines";
+
+is  wrap('', '', "some other text here that should\nbe wrapped slightly different"),
+    "some other[N]text here that[N]should\nbe wrapped[N]slightly[N]different",
+    '$separator2 should only add to the original text, not replace existing delimiters';
