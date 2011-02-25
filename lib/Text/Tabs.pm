@@ -1,14 +1,16 @@
-module Text::Tabs:ver<*>;
+module Text::Tabs;
 
-our Int $tabstop = 8;
-our Bool $debug = False;
+our #`[Int] $tabstop = 8;
+our #`[Bool] $debug = False;
 
 sub expand(*@in) is export {
     @in.map: {
         my $s = '';
 
         # TODO: this could be done better, and without the s///
-        for $^x.comb(/^^ \N* \n?/) -> $tmp is copy {
+        for $^x.comb(/^^ \N* \n?/) -> $line {
+            my $tmp = $line;
+
             # find the position of all \t so we can calculate the position when we replace them
             my @pos = $tmp.split(/\t/, :all).grep(Match)».from;
 
@@ -29,14 +31,16 @@ sub expand(*@in) is export {
 
 sub unexpand(*@in) is export {
     my $ts_as_space = ' ' x $tabstop;
+    my $ts_sized_space;
 
-    # TODO: workaround for rakudo not supporting $vars in quantifiers
-    my $ts_sized_space = eval "rx/(.**$tabstop)/";
+    # FIXME: Rakudo doesn't support $vars as regex quantifiers. Niecza doesn't support eval...
+    $ts_sized_space = eval "rx/.**$tabstop/";
+    #$ts_sized_space = rx/.**$tabstop/;
 
     @in.map: {
         # .lines will eat a trailing \n, so don't use it here
         $^text.split("\n").map({
-            my @e = split($ts_sized_space, expand($^line), :all);
+            my @e = expand($^line).split($ts_sized_space, :all);
             my $tail = pop(@e) // '';
 
             @e».subst(/\s\s+$/, "\t").join

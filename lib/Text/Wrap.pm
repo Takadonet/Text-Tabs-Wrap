@@ -1,16 +1,16 @@
-module Text::Wrap:ver<*>;
+module Text::Wrap;
 use Text::Tabs;
 
 my regex break { \s };
-our Bool $debug = False;    #='Makes wrap() extra-noisy'
+our #`[Bool] $debug = False;    # Makes wrap() extra-noisy
 
 our $break = rx{\s};
-our $huge = 'wrap';         #='How to handle long words; valid values are <wrap die overflow>'
-our Int $columns = 76;      #='Screen width'
-our Int $tabstop = 8;       #='The logical width of a \t'
-our Bool $unexpand = True;  #='Whether to compress leading indent into tabs after wrapping'
-our Str $separator = "\n";  #='String used to join wrapped "lines"'
-our Str $separator2;        #='String used to join lines, which preserves $separator if set'
+our $huge = 'wrap';             # How to handle long words; valid values are <wrap die overflow>
+our #`[Int] $columns = 76;      # Screen width
+our #`[Int] $tabstop = 8;       # The logical width of a \t
+our #`[Bool] $unexpand = True;  # Whether to compress leading indent into tabs after wrapping
+our #`[Str] $separator = "\n";  # String used to join wrapped "lines"
+our #`[Str] $separator2;        # String used to join lines, which preserves $separator if set
 
 sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
     #local($Text::Tabs::tabstop) = $tabstop;
@@ -33,19 +33,16 @@ sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
     my $lead = $para-indent;
 
     # TODO: replace with .graphs sometime
-    my Int $nll = $columns - expand($line-indent).chars - 1;
+    my $nll = $columns - expand($line-indent).chars - 1;
 
     if $nll <= 0 && $line-indent ne '' {
         my $nc = expand($line-indent).chars + 2;
-        warn sprintf(
-            'Increasing $Text::Wrap::columns from %d to %d to accommodate length of subsequent tab',
-            $columns, $nc
-        );
+        warn "\$Text::Wrap::columns is too small; increasing it from $columns to $nc";
         $columns = $nc;
         $nll = 1;
     }
 
-    my Int $ll = [max] 0, $columns - expand($para-indent).chars - 1;
+    my $ll = [max] 0, $columns - expand($para-indent).chars - 1;
     my $r = '';
     my $nl = '';
     my $remainder = '';
@@ -122,17 +119,10 @@ sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
 }
 
 sub fill(Str $para-indent, Str $line-indent, *@raw) is export {
-    my @para;
-
-    for split(/\n\s+/, join("\n", @raw)) -> $pp is copy {
-        $pp ~~ s:g/\s+/ /;
-        my $x = wrap($para-indent, $line-indent, $pp);
-        @para.push($x);
-    }
-
-    # if paragraph_indent is the same as line_indent,
-    # separate paragraphs with blank lines
-    return @para.join( $para-indent eq $line-indent ?? "\n\n" !! "\n" );
+    # if paragraph_indent is the same as line_indent, paragraphs are separated with blank lines
+    @raw.join("\n").split(/\n\s+/).map({
+        wrap($para-indent, $line-indent, $^line.split(/\s+/).join(' '));
+    }).join( $para-indent eq $line-indent ?? "\n\n" !! "\n" );
 }
 
 # =head1 NAME
