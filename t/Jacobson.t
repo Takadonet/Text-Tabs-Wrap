@@ -3,6 +3,10 @@ use v6;
 use Test;
 use Text::Wrap;
 
+BEGIN {
+    @*INC.push('lib');
+}
+
 my @input = (
     "mmmm,n,ooo,ppp.qqqq.rrrrr,sssssssssssss,ttttttttt,uu,vvv wwwwwwwww####\n",
     "mmmm,n,ooo,ppp.qqqq.rrrrr.adsljasdf\nlasjdflajsdflajsdfljasdfl\nlasjdflasjdflasf,sssssssssssss,ttttttttt,uu,vvv wwwwwwwww####\n"
