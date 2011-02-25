@@ -21,9 +21,9 @@ for @tests -> $filename {
     my $in = open("$*PROGRAM_NAME.input/$filename").slurp;
     my $out = open("$*PROGRAM_NAME.output/$filename").slurp;
 
-    # Test single string usage
     is  wrap('   ', ' ', $in),
-        $out;
+        $out,
+        "$filename (as one string)";
 
     # Test multiple string usage
     my @in = $in.split(/\n/);
@@ -32,7 +32,8 @@ for @tests -> $filename {
     @in[0 ..^ @in-1] >>~=>> "\n";
 
     is  wrap('   ', ' ', @in),
-        $out;
+        $out,
+        "$filename (array of lines)";
 }
 
 $Text::Wrap::huge = 'overflow';

@@ -20,5 +20,6 @@ for @tests -> $filename {
     my $out = open("$*PROGRAM_NAME.output/$filename").slurp;
 
     is  unexpand($in),
-        $out;
+        $out,
+        $filename;
 }

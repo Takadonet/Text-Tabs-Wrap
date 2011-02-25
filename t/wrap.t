@@ -34,7 +34,8 @@ for @tests -> $filename {
     }
 
     is  wrap('   ', ' ', @in.join("\n")),
-        @out.join("\n");
+        @out.join("\n"),
+        $filename;
 }
 
 # Overflow test
