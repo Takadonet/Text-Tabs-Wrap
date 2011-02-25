@@ -4,8 +4,7 @@ our Int $tabstop = 8;
 our Bool $debug = False;
 
 sub expand(*@in) is export {
-    # FIXME: if we return the whole array, several tests fail
-    return @in.map({
+    @in.map: {
         my $s = '';
 
         # TODO: this could be done better, and without the s///
@@ -25,7 +24,7 @@ sub expand(*@in) is export {
         }
 
         $s;
-    })[0];
+    }
 }
 
 sub unexpand(*@in) is export {
@@ -34,8 +33,8 @@ sub unexpand(*@in) is export {
     # TODO: workaround for rakudo not supporting $vars in quantifiers
     my $ts_sized_space = eval "rx/(.**$tabstop)/";
 
-    return @in.map: {
-        # FIXME: t/tabs.t fails if attempt to use .lines here, figure out why
+    @in.map: {
+        # .lines will eat a trailing \n, so don't use it here
         $^text.split("\n").map({
             my @e = split($ts_sized_space, expand($^line), :all);
             my $tail = pop(@e) // '';
@@ -43,7 +42,7 @@ sub unexpand(*@in) is export {
             @e».subst(/\s\s+$/, "\t").join
                   ~ ($tail eq $ts_as_space ?? "\t" !! $tail);
         }).join("\n");
-    };
+    }
 }
 
 # =head1 NAME
