@@ -11,44 +11,54 @@ our #`[Str] $separator2;        # String used to join lines, which preserves $se
 
 sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
     my $tail = pop(@texts);
-    my $t = expand(@texts.map({ /\s+$/ ?? $_ !! $_ ~ ' ' }).join ~ $tail);
+    my $text = expand(@texts.map({ /\s+$/ ?? $_ !! $_ ~ ' ' }).join ~ $tail);
     my $lead = $para-indent;
 
-    my $nll = $columns - expand($line-indent).chars - 1;
-    if $nll <= 0 && $line-indent ne '' {
+    # Compute the available space for lines with normal indent
+    my $body-line-length = $columns - expand($line-indent).chars - 1;
+    if $body-line-length <= 0 && $line-indent ne '' {
         my $nc = expand($line-indent).chars + 2;
         warn "\$Text::Wrap::columns is too small; increasing it from $columns to $nc";
         $columns = $nc;
-        $nll = 1;
+        $body-line-length = 1;
     }
 
-    my $ll = [max] 0, $columns - expand($para-indent).chars - 1;
+    # Available space for the current line, initially with first-line indent. After the first loop
+    # iteration this gets replaced by the normal line length
+    my $line-length = [max] 0, $columns - expand($para-indent).chars - 1;
+
+    # Output buffer
     my $out = '';
     my $nl = '';
     my $remainder = '';
 
-    sub unexpand-if { $unexpand ?? unexpand($^a) !! $^a }
+    sub unexpand-if { $unexpand ?? unexpand($^a) !! $^a };
 
-    while $t !~~ m/^\s*$/ {
+    my regex trailingws { \s*$ };
+
+    # FIXME: this should be doable without rewriting the string
+    while $text !~~ m/^<.&trailingws>/ {
         # Look for a word less than the maximum line length
-        if $t ~~ m/^(\N**0..*) <?{$0.chars <= $ll}> (<$break>|\n+|$)(.*)/ {
+        if $text ~~ m/^(\N**0..*) <?{$0.chars <= $line-length}> (<$break>|\n+|$)(.*)/ {
             $out ~= unexpand-if($nl ~ $lead ~ $0);
             $remainder = $1;
-            $t = $2;
+            $text = $2;
         }
-        # If that fails, try to handle the word according to $Text::Wrap::huge
-        elsif $huge eq 'wrap' and $t ~~ m/^(\N**0..*) <?{$0.chars == $ll}>/ {
+        # If that fails, try to handle the word according to $Text::Wrap::huge -
+        # Grab a full line's worth of characters
+        elsif $huge eq 'wrap' and $text ~~ m/^(\N**0..*) <?{$0.chars == $line-length}>/ {
             $out ~= unexpand-if($nl ~ $lead ~ $0);
             $remainder = ($separator2 or $separator);
-            $t = $t.substr($0.chars);
+            $text = $text.substr($0.chars);
         }
-        elsif $huge eq 'overflow' and $t ~~ m/(\N*?)(<$break>|\n+|$)(.*)/ {
+        # Grab up to the next word-break, line-break or end of text
+        elsif $huge eq 'overflow' and $text ~~ m/(\N*?)(<$break>|\n+|$)(.*)/ {
             $out ~= unexpand-if($nl ~ $lead ~ $0);
             $remainder = $1;
-            $t = $2;
+            $text = $2;
         }
         elsif $huge eq 'die' {
-            die "Couldn't wrap '$t' - word is longer than requested text width $columns";
+            die "Couldn't wrap '$text' - word is longer than requested text width $columns";
         }
         # Attempt to recover if the user asked for unreasonably small wrap width
         elsif $columns < 2 {
@@ -58,11 +68,11 @@ sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
         }
         # If all else fails...
         else {
-            die "This shouldn't happen";
+            die "Sanity check failed: couldn't wrap text (columns=$columns)";
         }
 
         $lead = $line-indent;
-        $ll = $nll;
+        $line-length = $body-line-length;
         $nl = $separator2 ?? $remainder eq "\n" ?? $remainder
                                                 !! $separator2
                           !! $separator;
