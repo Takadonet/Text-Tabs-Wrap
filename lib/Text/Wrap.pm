@@ -27,36 +27,34 @@ sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
     # iteration this gets replaced by the normal line length
     my $line-length = [max] 0, $columns - expand($para-indent).chars - 1;
 
-    # Output buffer
-    my $out = '';
-    my $nl = '';
-    my $remainder = '';
+    my $out = ''; # Output buffer
+    my $nl = ''; # Output "line" delimiter (usually \n)
+    my $remainder = ''; # Buffer to catch trailing text
+    my $pos = 0; # Input regex cursor
 
     sub unexpand-if { $unexpand ?? unexpand($^a) !! $^a };
 
-    my regex trailingws { \s*$ };
-
-    # FIXME: this should be doable without rewriting the string
-    while $text !~~ m/^<.&trailingws>/ {
-        # Look for a word less than the maximum line length
-        if $text ~~ m/^(\N**0..*) <?{$0.chars <= $line-length}> (<$break>|\n+|$)(.*)/ {
+    while $pos <= $text.chars and $text !~~ m:p($pos)/\s*$/ {
+        # Grab as many whole words as possible that'll fit in $line-length
+        if $text ~~ m:p($pos)/(\N**0..*) <?{$0.chars <= $line-length}> <before [<$break>|\n+|$]>/ {
+            $pos = $/.to + 1;
+            $remainder = $text.substr($/.to);
             $out ~= unexpand-if($nl ~ $lead ~ $0);
-            $remainder = $1;
-            $text = $2;
         }
-        # If that fails, try to handle the word according to $Text::Wrap::huge -
-        # Grab a full line's worth of characters
-        elsif $huge eq 'wrap' and $text ~~ m/^(\N**0..*) <?{$0.chars == $line-length}>/ {
-            $out ~= unexpand-if($nl ~ $lead ~ $0);
+        # If that fails, the behaviour depends on the setting of $huge -
+        #  - Eat a full line's worth of characters whether or not there's a word break at the end
+        elsif $huge eq 'wrap' and $text ~~ m:p($pos)/(\N**0..*) <?{$0.chars == $line-length}>/ {
+            $pos = $/.to;
             $remainder = ($separator2 or $separator);
-            $text = $text.substr($0.chars);
-        }
-        # Grab up to the next word-break, line-break or end of text
-        elsif $huge eq 'overflow' and $text ~~ m/(\N*?)(<$break>|\n+|$)(.*)/ {
             $out ~= unexpand-if($nl ~ $lead ~ $0);
-            $remainder = $1;
-            $text = $2;
         }
+        # - Grab up to the next word-break, line-break or end of text regardless of length
+        elsif $huge eq 'overflow' and $text ~~ m:p($pos)/(\N*?) <before [<$break>|\n+|$]>/ {
+            $pos = $/.to;
+            $remainder = $text.substr($/.to);
+            $out ~= unexpand-if($nl ~ $lead ~ $0);
+        }
+        # - Or just give up
         elsif $huge eq 'die' {
             die "Couldn't wrap '$text' - word is longer than requested text width $columns";
         }
@@ -68,7 +66,7 @@ sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
         }
         # If all else fails...
         else {
-            die "Sanity check failed: couldn't wrap text (columns=$columns)";
+            die "All attempts to wrap text failed (columns=$columns)";
         }
 
         $lead = $line-indent;
