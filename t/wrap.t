@@ -9,7 +9,6 @@ BEGIN {
 }
 
 TestFiles::run(
-    add-to-plan => 1,
     test-block => sub ($in, $out, $filename) {
         my @in = $in.lines;
         my @out = $out.lines;
@@ -33,9 +32,3 @@ TestFiles::run(
             "$filename - wrap.t";
     }
 );
-
-$Text::Wrap::columns = 10;
-$Text::Wrap::huge = "wrap";
-is  wrap("verylongindent", "", "foo"),
-    "verylongindent\nfoo",
-    'Words wrap to next line correctly when the first-line indent is bigger than $columns';
