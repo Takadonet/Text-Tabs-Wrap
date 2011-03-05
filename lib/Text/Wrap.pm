@@ -9,19 +9,39 @@ our #`[Bool] $unexpand = True;  # Whether to compress leading indent into tabs a
 our #`[Str] $separator = "\n";  # String used to join wrapped "lines"
 our #`[Str] $separator2;        # String used to join lines, which preserves $separator if set
 
-sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
+sub wrap(Str $para-indent, Str $body-indent, *@texts) is export {
     my $tail = pop(@texts);
     my $text = expand(@texts.map({ /\s+$/ ?? $_ !! $_ ~ ' ' }).join ~ $tail);
-    my $lead = $para-indent;
 
-    # Compute the available space for the first and subsequent lines.  Normal line length is
-    # constrained by $columns on the right and either $para-indent or $line-indent on the left. An
-    # extra column is subtracted to reserve space for the \n on each line, down to a minimum of 1
-    # character per line, however the first line is permitted to have zero characters of content
-    # (text just wraps to the next line with sufficient content width)
-    my $first-line-length = [max] 0, $columns - expand($para-indent).chars - 1;
-    my $body-line-length = [max] 1, $columns - expand($line-indent).chars - 1;
-    my $line-length = $first-line-length;
+    my %first-line = margin => expand($para-indent).chars;
+    my %body-line = margin => expand($body-indent).chars;
+
+    # If either margin is larger than $columns, expand the line size and emit a warning
+    my $min-width = [max] %first-line<margin>, %body-line<margin>;
+    if $columns < $min-width {
+        warn "Increasing column width from $columns to $min-width to contain requested indent";
+        $columns = $min-width;
+    }
+
+    # The first line is allowed to have zero characters if the indent consumes all available space,
+    # in which case text starts on the next line instead.
+    %first-line<content> = [max] 0, $columns - %first-line<margin>;
+    %body-line<content> = [max] 1, $columns - %body-line<margin>;
+
+    %first-line<width> = [+] %first-line<margin content>;
+    %body-line<width> = [+] %body-line<margin content>;
+
+    # 1 character is reserved for "\n", except if it would leave no space for text otherwise.
+    if %first-line<content> > 0 and %body-line<content> > 1 {
+        --%first-line<content>;
+        --%body-line<content>;
+    }
+
+    my %current = (
+        first-line => True,
+        content => %first-line<content>,
+        indent => $para-indent,
+    );
 
     my $out = ''; # Output buffer
     my $output-delimiter = ''; # Usually \n
@@ -34,24 +54,24 @@ sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
     while $pos <= $text.chars and $text !~~ m:p($pos)/\s*$/ {
         $old-pos = $pos;
 
-        # Grab as many whole words as possible that'll fit in $line-length
-        if $text ~~ m:p($pos)/(\N**0..*) <?{$0.chars <= $line-length}> (<$break>|\n+|$)/ {
+        # Grab as many whole words as possible that'll fit in $current-line-content
+        if $text ~~ m:p($pos)/(\N**0..*) <?{$0.chars <= %current<content>}> (<$break>|\n+|$)/ {
             $pos = $0.to + 1;
             $remainder = $1;
-            $out ~= unexpand-if($output-delimiter ~ $lead ~ $0);
+            $out ~= unexpand-if($output-delimiter ~ %current<indent> ~ $0);
         }
         # If that fails, the behaviour depends on the setting of $huge -
         #  - Eat a full line's worth of characters whether or not there's a word break at the end
-        elsif $huge eq 'wrap' and $text ~~ m:p($pos)/(\N**0..*) <?{$0.chars == $line-length}>/ {
+        elsif $huge eq 'wrap' and $text ~~ m:p($pos)/(\N**0..*) <?{$0.chars == %current<content>}>/ {
             $pos = $/.to;
             $remainder = ($separator2 or $separator);
-            $out ~= unexpand-if($output-delimiter ~ $lead ~ $0);
+            $out ~= unexpand-if($output-delimiter ~ %current<indent> ~ $0);
         }
         # - Grab up to the next word-break, line-break or end of text regardless of length
         elsif $huge eq 'overflow' and $text ~~ m:p($pos)/(\N*?) (<$break>|\n+|$)/ {
             $pos = $0.to;
             $remainder = $1;
-            $out ~= unexpand-if($output-delimiter ~ $lead ~ $0);
+            $out ~= unexpand-if($output-delimiter ~ %current<indent> ~ $0);
         }
         elsif $huge eq 'die' or $columns >= 2 {
             die "Couldn't wrap text - requested text width '$columns' is too small";
@@ -60,16 +80,19 @@ sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
             # $columns < 2, attempt to recover by expanding it.
             warn "Failed to wrap with text width set to '$columns', retrying with 2";
             $columns = 2;
-            return wrap($para-indent, $line-indent, @texts);
+            return wrap($para-indent, $body-indent, @texts);
         }
 
-        if $old-pos == $pos and $line-length == $body-line-length {
+        if $old-pos == $pos and %current<content> == %body-line<content> {
             die 'Infinite loop detected, please smack flussence with the cluebat';
         }
 
         # Replace this after the first line is done
-        $lead = $line-indent;
-        $line-length = $body-line-length;
+        %current = (
+            first-line => False,
+            content => %body-line<content>,
+            indent => $body-indent,
+        ) if %current<first-line>;
 
         $output-delimiter =
             $separator2 ?? $remainder eq "\n" ?? "\n"
@@ -82,13 +105,13 @@ sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
 
 # Rewraps paragraphs, discarding original space. A paragraph is detected by leading indent on the
 # first line. If para-indent is the same as line-indent, paragraphs are separated by blank lines.
-sub fill(Str $para-indent, Str $line-indent, *@raw) is export {
+sub fill(Str $para-indent, Str $body-indent, *@raw) is export {
     @raw.join("\n")\
         .split(/\n\s+/)\
         .map({
-            wrap($para-indent, $line-indent, $^paragraph.split(/\s+/).join(' '))
+            wrap($para-indent, $body-indent, $^paragraph.split(/\s+/).join(' '))
         })\
-        .join($para-indent eq $line-indent ?? "\n\n" !! "\n");
+        .join($para-indent eq $body-indent ?? "\n\n" !! "\n");
 }
 
 # =head1 NAME

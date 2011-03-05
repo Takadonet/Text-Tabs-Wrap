@@ -7,10 +7,9 @@ BEGIN {
     @*INC.push('lib');
 }
 
-# Test that columns=1 works correctly
+# Test that columns=1 works correctly and doesn't go into infinite loop
 
 plan 1;
-todo 1 => 'columns=1 goes into an infinite loop';
 
 $Text::Wrap::columns = 1;
 

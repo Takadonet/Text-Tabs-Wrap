@@ -15,11 +15,8 @@ my $leading-indent = " (Karl-Bonhoeffer-Nervenklinik zwischen Hermann-Piper-Str.
 my $paragraph-indent = " ";
 my $main-text = "(5079,19635 5124,19634 5228,19320 5246,19244)\n";
 
-my $got;
 lives_ok {
-    $got = wrap($leading-indent, $paragraph-indent, $main-text);
-}
-
-is  $got,
-    " (Karl-Bonhoeffer-Nervenklinik zwischen Hermann-Piper-Str. und U-Bahnhof) (\n"
-  ~ " 5079,19635 5124,19634 5228,19320 5246,19244)\n";
+    is  wrap($leading-indent, $paragraph-indent, $main-text),
+        " (Karl-Bonhoeffer-Nervenklinik zwischen Hermann-Piper-Str. und U-Bahnhof) (\n"
+      ~ " 5079,19635 5124,19634 5228,19320 5246,19244)\n";
+} or flunk('First test died');
