@@ -14,31 +14,29 @@ sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
     my $text = expand(@texts.map({ /\s+$/ ?? $_ !! $_ ~ ' ' }).join ~ $tail);
     my $lead = $para-indent;
 
-    # Compute the available space for lines with normal indent
-    my $body-line-length = $columns - expand($line-indent).chars - 1;
-    if $body-line-length <= 0 && $line-indent ne '' {
-        my $nc = expand($line-indent).chars + 2;
-        warn "\$Text::Wrap::columns is too small; increasing it from $columns to $nc";
-        $columns = $nc;
-        $body-line-length = 1;
-    }
-
-    # Available space for the current line, initially with first-line indent. After the first loop
-    # iteration this gets replaced by the normal line length
-    my $line-length = [max] 0, $columns - expand($para-indent).chars - 1;
+    # Compute the available space for the first and subsequent lines.  Normal line length is
+    # constrained by $columns on the right and either $para-indent or $line-indent on the left. An
+    # extra column is subtracted to reserve space for the \n on each line, down to a minimum of 1
+    # character per line.
+    my $first-line-length = [max] 1, $columns - expand($para-indent).chars - 1;
+    my $body-line-length = [max] 1, $columns - expand($line-indent).chars - 1;
+    my $line-length = $first-line-length;
 
     my $out = ''; # Output buffer
     my $nl = ''; # Output "line" delimiter (usually \n)
     my $remainder = ''; # Buffer to catch trailing text
     my $pos = 0; # Input regex cursor
 
+    my $old-pos;
     sub unexpand-if { $unexpand ?? unexpand($^a) !! $^a };
 
     while $pos <= $text.chars and $text !~~ m:p($pos)/\s*$/ {
+        $old-pos = $pos;
+
         # Grab as many whole words as possible that'll fit in $line-length
-        if $text ~~ m:p($pos)/(\N**0..*) <?{$0.chars <= $line-length}> <before [<$break>|\n+|$]>/ {
-            $pos = $/.to + 1;
-            $remainder = $text.substr($/.to);
+        if $text ~~ m:p($pos)/(\N**0..*) <?{$0.chars <= $line-length}> (<$break>|\n+|$)/ {
+            $pos = $0.to + 1;
+            $remainder = $1;
             $out ~= unexpand-if($nl ~ $lead ~ $0);
         }
         # If that fails, the behaviour depends on the setting of $huge -
@@ -49,31 +47,31 @@ sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
             $out ~= unexpand-if($nl ~ $lead ~ $0);
         }
         # - Grab up to the next word-break, line-break or end of text regardless of length
-        elsif $huge eq 'overflow' and $text ~~ m:p($pos)/(\N*?) <before [<$break>|\n+|$]>/ {
-            $pos = $/.to;
-            $remainder = $text.substr($/.to);
+        elsif $huge eq 'overflow' and $text ~~ m:p($pos)/(\N*?) (<$break>|\n+|$)/ {
+            $pos = $0.to;
+            $remainder = $1;
             $out ~= unexpand-if($nl ~ $lead ~ $0);
         }
-        # - Or just give up
-        elsif $huge eq 'die' {
-            die "Couldn't wrap '$text' - word is longer than requested text width $columns";
+        elsif $huge eq 'die' or $columns >= 2 {
+            die "Couldn't wrap text - requested text width '$columns' is too small";
         }
-        # Attempt to recover if the user asked for unreasonably small wrap width
-        elsif $columns < 2 {
-            warn "Failed to wrap with text width set to $columns, retrying with 2";
+        else {
+            # $columns < 2, attempt to recover by expanding it.
+            warn "Failed to wrap with text width set to '$columns', retrying with 2";
             $columns = 2;
             return wrap($para-indent, $line-indent, @texts);
         }
-        # If all else fails...
-        else {
-            die "All attempts to wrap text failed (columns=$columns)";
-        }
 
         $lead = $line-indent;
+        # Replace this after the first line is done
         $line-length = $body-line-length;
         $nl = $separator2 ?? $remainder eq "\n" ?? $remainder
                                                 !! $separator2
                           !! $separator;
+
+        if $old-pos == $pos {
+            die 'Infinite loop detected, please smack flussence with the cluebat';
+        }
     }
 
     return $out ~ $remainder;
