@@ -17,13 +17,14 @@ sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
     # Compute the available space for the first and subsequent lines.  Normal line length is
     # constrained by $columns on the right and either $para-indent or $line-indent on the left. An
     # extra column is subtracted to reserve space for the \n on each line, down to a minimum of 1
-    # character per line.
-    my $first-line-length = [max] 1, $columns - expand($para-indent).chars - 1;
+    # character per line, however the first line is permitted to have zero characters of content
+    # (text just wraps to the next line with sufficient content width)
+    my $first-line-length = [max] 0, $columns - expand($para-indent).chars - 1;
     my $body-line-length = [max] 1, $columns - expand($line-indent).chars - 1;
     my $line-length = $first-line-length;
 
     my $out = ''; # Output buffer
-    my $nl = ''; # Output "line" delimiter (usually \n)
+    my $output-delimiter = ''; # Usually \n
     my $remainder = ''; # Buffer to catch trailing text
     my $pos = 0; # Input regex cursor
 
@@ -37,20 +38,20 @@ sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
         if $text ~~ m:p($pos)/(\N**0..*) <?{$0.chars <= $line-length}> (<$break>|\n+|$)/ {
             $pos = $0.to + 1;
             $remainder = $1;
-            $out ~= unexpand-if($nl ~ $lead ~ $0);
+            $out ~= unexpand-if($output-delimiter ~ $lead ~ $0);
         }
         # If that fails, the behaviour depends on the setting of $huge -
         #  - Eat a full line's worth of characters whether or not there's a word break at the end
         elsif $huge eq 'wrap' and $text ~~ m:p($pos)/(\N**0..*) <?{$0.chars == $line-length}>/ {
             $pos = $/.to;
             $remainder = ($separator2 or $separator);
-            $out ~= unexpand-if($nl ~ $lead ~ $0);
+            $out ~= unexpand-if($output-delimiter ~ $lead ~ $0);
         }
         # - Grab up to the next word-break, line-break or end of text regardless of length
         elsif $huge eq 'overflow' and $text ~~ m:p($pos)/(\N*?) (<$break>|\n+|$)/ {
             $pos = $0.to;
             $remainder = $1;
-            $out ~= unexpand-if($nl ~ $lead ~ $0);
+            $out ~= unexpand-if($output-delimiter ~ $lead ~ $0);
         }
         elsif $huge eq 'die' or $columns >= 2 {
             die "Couldn't wrap text - requested text width '$columns' is too small";
@@ -62,16 +63,18 @@ sub wrap(Str $para-indent, Str $line-indent, *@texts) is export {
             return wrap($para-indent, $line-indent, @texts);
         }
 
-        $lead = $line-indent;
-        # Replace this after the first line is done
-        $line-length = $body-line-length;
-        $nl = $separator2 ?? $remainder eq "\n" ?? $remainder
-                                                !! $separator2
-                          !! $separator;
-
-        if $old-pos == $pos {
+        if $old-pos == $pos and $line-length == $body-line-length {
             die 'Infinite loop detected, please smack flussence with the cluebat';
         }
+
+        # Replace this after the first line is done
+        $lead = $line-indent;
+        $line-length = $body-line-length;
+
+        $output-delimiter =
+            $separator2 ?? $remainder eq "\n" ?? "\n"
+                                              !! $separator2
+                        !! $separator;
     }
 
     return $out ~ $remainder;
