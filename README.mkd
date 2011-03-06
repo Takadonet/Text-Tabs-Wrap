@@ -1,0 +1,37 @@
+Text-Tabs-Wrap
+==============
+
+Text-Tabs-Wrap is a port of the Perl 5 Text-Tabs+Wrap distribution to Perl 6. We changed the "+" to
+a "-" because the p5 code's licence required modified versions to use a different name. Also because
+it looks nicer.
+
+Text::Tabs provides the `expand` and `unexpand` functions, which perform the same job that the
+Unix `expand(1)` and `unexpand(1)` commands do: adding or removing tabs from a document.
+
+Text::Wrap gives you `wrap` and `fill` functions. `wrap` will break up long lines; it doesn't join
+short lines together. `fill` reformats entire blocks of text, similar to vi's `gq` command.
+
+Current status (2011-03-06)
+---------------------------
+
+Most tests pass in Rakudo, apart from a few relying on NYI bits of regex.
+
+Doesn't work in Niecza yet, due to (very few) missing features.
+
+Text::Wrap is still under the influence of the Perl 5 API which uses package globals for nearly
+everything. We'll keep this around for a while for the sake of making porting easier, but it's
+almost certainly going away. They'll become named params or something along those lines.
+
+Building Text-Tabs-Wrap
+-----------------------
+
+Currently the easiest way is to get [neutro](https://github.com/tadzik/neutro), and then on the
+command line run `neutro Text-Tabs-Wrap`.
+
+Credits
+-------
+
+[Takadonet](https://github.com/Takadonet) did the initial porting work from Perl 5 to 6, and
+[flussence](https://github.com/flussence) rewrote everything to look nicer.
+
+The original Perl 5 code was created by [David Muir Sharnoff](http://search.cpan.org/~muir/).
