@@ -1,5 +1,33 @@
 module Text::Tabs;
 
+=begin pod
+
+=head1 NAME
+
+Text::Tabs -- expand and unexpand tabs per the unix expand(1) and unexpand(1)
+
+=head1 SYNOPSIS
+
+=begin code
+    use Text::Tabs;
+
+    $tabstop = 4;  # default = 8
+    @lines_without_tabs = expand(@lines_with_tabs);
+    @lines_without_tabs = expand(:$tabstop, @lines_with_tabs);
+    @lines_with_tabs = unexpand(@lines_without_tabs);
+    @lines_with_tabs = unexpand(:$tabstop, @lines_without_tabs);
+    @lines_with_tabs = unexpand(:tabstop(3), @lines_without_tabs);
+=end code
+
+=head1 DESCRIPTION
+
+Text::Tabs does about what the Unix utilities C<expand(1)> and C<unexpand(1)> do.
+C<expand()> will replace the tabs in a line with the appropriate number of spaces. C<unexpand()>
+will convert spaces to tabs when it can save bytes by doing so (just like C<unexpand -a>).
+Invisible compression with plain ASCII!
+
+=end pod
+
 sub expand(:$tabstop = 8, *@in) is export {
     @in.map: {
         $^text.split("\n").map({
@@ -33,49 +61,15 @@ sub unexpand(:$tabstop = 8, *@in) is export {
     }
 }
 
-# =head1 NAME
+=begin pod
 
-# Text::Tabs -- expand and unexpand tabs per the unix expand(1) and unexpand(1)
+=head1 LICENSE
 
-# =head1 SYNOPSIS
+Copyright (C) 1996-2002,2005,2006 David Muir Sharnoff.
+Copyright (C) 2005 Aristotle Pagaltzis
+This module may be modified, used, copied, and redistributed at your own risk.
+Publicly redistributed modified versions must use a different name.
 
-#   use Text::Tabs;
-
-#   $tabstop = 4;  # default = 8
-#   @lines_without_tabs = expand(@lines_with_tabs);
-#   @lines_with_tabs = unexpand(@lines_without_tabs);
-
-# =head1 DESCRIPTION
-
-# Text::Tabs does about what the unix utilities expand(1) and unexpand(1)
-# do.  Given a line with tabs in it, expand will replace the tabs with
-# the appropriate number of spaces.  Given a line with or without tabs in
-# it, unexpand will add tabs when it can save bytes by doing so (just
-# like C<unexpand -a>).  Invisible compression with plain ASCII!
-
-# =head1 EXAMPLE
-
-#   #!perl
-#   # unexpand -a
-#   use Text::Tabs;
-
-#   while (<>) {
-#     print unexpand $_;
-#   }
-
-# Instead of the C<expand> comand, use:
-
-#   perl -MText::Tabs -n -e 'print expand $_'
-
-# Instead of the C<unexpand -a> command, use:
-
-#   perl -MText::Tabs -n -e 'print unexpand $_'
-
-# =head1 LICENSE
-
-# Copyright (C) 1996-2002,2005,2006 David Muir Sharnoff.
-# Copyright (C) 2005 Aristotle Pagaltzis
-# This module may be modified, used, copied, and redistributed at your own risk.
-# Publicly redistributed modified versions must use a different name.
+=end pod
 
 # vim: set ft=perl6 :
