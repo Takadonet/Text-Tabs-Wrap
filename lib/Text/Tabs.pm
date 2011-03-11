@@ -63,12 +63,35 @@ sub unexpand(:$tabstop = 8, *@in) is export {
 
 =begin pod
 
-=head1 LICENSE
+=head1 AUTHORS
 
+Original Perl 5 code:
 Copyright (C) 1996-2002,2005,2006 David Muir Sharnoff.
 Copyright (C) 2005 Aristotle Pagaltzis
-This module may be modified, used, copied, and redistributed at your own risk.
-Publicly redistributed modified versions must use a different name.
+
+Perl 6 rewrite:
+Copyright © 2010-2011 Philip Mabon (L<https://github.com/Takadonet>)
+Copyright © 2011 Anthony Parsons (L<https://github.com/flussence>)
+
+=head1 LICENSE
+
+This software is provided 'as-is', without any express or implied warranty.  In no event will the
+author(s) be held liable for any damages arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose, including commercial
+applications, and to alter it and redistribute it freely, subject to the following restrictions:
+
+=item 1.
+The origin of this software must not be misrepresented; you must not claim that you wrote the
+original software. If you use this software in a product, an acknowledgment in the product
+documentation would be appreciated but is not required.
+
+=item 2.
+Altered source versions must be plainly marked as such, and must not be misrepresented as being the
+original software.
+
+=item 3.
+This notice may not be removed or altered from any source distribution.
 
 =end pod
 

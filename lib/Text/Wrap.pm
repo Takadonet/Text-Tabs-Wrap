@@ -249,12 +249,38 @@ sub fill(Str $para-indent, Str $body-indent, *@raw) is export {
 # For wrapping multi-byte characters: L<Text::WrapI18N>.
 # For more detailed controls: L<Text::Format>.
 
-# =head1 LICENSE
+=begin pod
 
-# David Muir Sharnoff <muir@idiom.org> with help from Tim Pierce and
-# many many others.  Copyright (C) 1996-2009 David Muir Sharnoff.
-# This module may be modified, used, copied, and redistributed at
-# your own risk.  Publicly redistributed versions that are modified
-# must use a different name.
+=head1 AUTHORS
+
+Original Perl 5 code:
+David Muir Sharnoff <muir@idiom.org> with help from Tim Pierce and
+many many others.  Copyright (C) 1996-2009 David Muir Sharnoff.
+
+Perl 6 rewrite:
+Copyright © 2010-2011 Philip Mabon (L<https://github.com/Takadonet>)
+Copyright © 2011 Anthony Parsons (L<https://github.com/flussence>)
+
+=head1 LICENSE
+
+This software is provided 'as-is', without any express or implied warranty.  In no event will the
+author(s) be held liable for any damages arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose, including commercial
+applications, and to alter it and redistribute it freely, subject to the following restrictions:
+
+=item 1.
+The origin of this software must not be misrepresented; you must not claim that you wrote the
+original software. If you use this software in a product, an acknowledgment in the product
+documentation would be appreciated but is not required.
+
+=item 2.
+Altered source versions must be plainly marked as such, and must not be misrepresented as being the
+original software.
+
+=item 3.
+This notice may not be removed or altered from any source distribution.
+
+=end pod
 
 # vim: set ft=perl6 :
