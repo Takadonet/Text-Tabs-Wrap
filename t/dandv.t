@@ -1,11 +1,8 @@
 #!/usr/bin/env perl6
 use v6;
+BEGIN { @*INC.push(<lib>) }
 use Test;
 use Text::Wrap;
-
-BEGIN {
-    @*INC.push('lib');
-}
 
 # Test that wrap() behaves sanely when the indent leaves space for only one character per line
 

@@ -1,12 +1,9 @@
 #!/usr/bin/env perl6
 use v6;
-use TestFiles;
+BEGIN { @*INC.push(<lib t_lib>) }
 use Test;
+use TestFiles;
 use Text::Wrap;
-
-BEGIN {
-    @*INC.push('lib');
-}
 
 TestFiles::run(
     test-block => sub ($in, $out, $filename) {

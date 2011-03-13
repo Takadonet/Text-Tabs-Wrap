@@ -1,11 +1,8 @@
 #!/usr/bin/env perl6
 use v6;
+BEGIN { @*INC.push(<lib>) }
 use Test;
 use Text::Wrap;
-
-BEGIN {
-    @*INC.push('lib');
-}
 
 # Test that columns=1 works correctly and doesn't go into infinite loop
 

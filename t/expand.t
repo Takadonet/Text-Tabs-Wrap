@@ -1,12 +1,9 @@
 #!/usr/bin/env perl6
 use v6;
-use TestFiles;
+BEGIN { @*INC.push(<lib t_lib>) }
 use Test;
+use TestFiles;
 use Text::Tabs;
-
-BEGIN {
-    @*INC.push('lib');
-}
 
 TestFiles::run(sub ($in, $out, $filename) {
     is expand($in.slurp), $out.slurp, $filename;

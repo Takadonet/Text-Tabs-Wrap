@@ -1,11 +1,8 @@
 #!/usr/bin/env perl6
 use v6;
+BEGIN { @*INC.push(<lib>) }
 use Test;
 use Text::Wrap;
-
-BEGIN {
-    @*INC.push('lib');
-}
 
 # original bug: https://rt.perl.org/rt3/Ticket/Display.html?id=39548
 
