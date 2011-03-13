@@ -1,9 +1,8 @@
 {
-    "name" : "Text::Tabs::Wrap",
-    "version" : "*",
-    "description" : "Dual function: Perform line wrapping to form simple paragraphs. and expand, unexpand tabs similar to unix expand(1) and unexpand(1)",
-    "depends" : [],
-    "repo-type" : "git",
-    "repo-url" : "git://github.com/Takadonet/Text-Tabs-Wrap.git"
+    "name"          : "Text-Tabs-Wrap",
+    "version"       : "*",
+    "description"   : "Simple line-wrapping and tab [un]expansion tools",
+    "depends"       : [],
+    "repo-type"     : "git",
+    "repo-url"      : "git://github.com/Takadonet/Text-Tabs-Wrap.git"
 }
-
