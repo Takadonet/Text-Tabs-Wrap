@@ -4,12 +4,11 @@ use Text::Tabs;
 our $break = rx{\s};
 our $huge = 'wrap';             # How to handle long words; valid values are <wrap die overflow>
 our #`[Int] $columns = 76;      # Screen width
-our #`[Int] $tabstop = 8;       # The logical width of a \t
 our #`[Bool] $unexpand = True;  # Whether to compress leading indent into tabs after wrapping
 our #`[Str] $separator = "\n";  # String used to join wrapped "lines"
 our #`[Str] $separator2;        # String used to join lines, which preserves $separator if set
 
-sub wrap(Str $para-indent, Str $body-indent, *@texts) is export {
+sub wrap(Str $para-indent, Str $body-indent, Int :$tabstop = 8, *@texts) returns Str is export {
     my $tail = pop(@texts);
     my $text = expand(@texts.map({ /\s+$/ ?? $_ !! $_ ~ ' ' }).join ~ $tail);
 
@@ -47,8 +46,8 @@ sub wrap(Str $para-indent, Str $body-indent, *@texts) is export {
     my $output-delimiter = ''; # Usually \n
     my $remainder = ''; # Buffer to catch trailing text
     my $pos = 0; # Input regex cursor
-
     my $old-pos;
+
     sub unexpand-if { $unexpand ?? unexpand($^a) !! $^a };
 
     while $pos <= $text.chars and $text !~~ m:p($pos)/\s*$/ {
@@ -105,7 +104,7 @@ sub wrap(Str $para-indent, Str $body-indent, *@texts) is export {
 
 # Rewraps paragraphs, discarding original space. A paragraph is detected by leading indent on the
 # first line. If para-indent is the same as line-indent, paragraphs are separated by blank lines.
-sub fill(Str $para-indent, Str $body-indent, *@raw) is export {
+sub fill(Str $para-indent, Str $body-indent, *@raw) returns Str is export {
     @raw.join("\n")\
         .split(/\n\s+/)\
         .map({
