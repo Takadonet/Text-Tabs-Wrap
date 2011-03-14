@@ -28,7 +28,7 @@ Invisible compression with plain ASCII!
 
 =end pod
 
-sub expand(:$tabstop = 8, *@in) is export {
+sub expand(Int :$tabstop = 8, *@in) returns Str is export {
     @in.map: {
         $^text.split("\n").map({
             # Split the line up into non-\t and \t, go through and replace \t with their *visual*
