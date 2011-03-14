@@ -45,24 +45,31 @@ our #`[Bool] $unexpand = True;  # Whether to compress leading indent into tabs a
 our #`[Str] $separator = "\n";  # String used to join wrapped "lines"
 our #`[Str] $separator2;        # String used to join lines, which preserves $separator if set
 
-sub wrap(Str $para-indent, Str $body-indent, Int :$tabstop = 8, *@texts) returns Str is export {
+sub wrap(Str $para-indent, Str $body-indent,
+         Int :$tabstop      = 8,
+         Int :$columns      = $Text::Wrap::columns,
+         Str :$huge         = $Text::Wrap::huge,
+         Str :$separator    = $Text::Wrap::separator,
+         Str :$separator2   = $Text::Wrap::separator2,
+         Bool :$unexpand    = $Text::Wrap::unexpand,
+         Regex :$break      = $Text::Wrap::break,
+         *@texts) returns Str is export {
     my $tail = pop(@texts);
     my $text = expand(@texts.map({ /\s+$/ ?? $_ !! $_ ~ ' ' }).join ~ $tail);
 
     my %first-line = margin => expand($para-indent).chars;
     my %body-line = margin => expand($body-indent).chars;
 
-    # If either margin is larger than $columns, expand the line size and emit a warning
-    my $min-width = [max] %first-line<margin>, %body-line<margin>;
-    if $columns < $min-width {
-        warn "Increasing column width from $columns to $min-width to contain requested indent";
-        $columns = $min-width;
+    # If either margin is larger than $columns, emit a warning
+    my $content-width = [max] $columns, %first-line<margin>, %body-line<margin>;
+    if $columns < $content-width {
+        warn "Increasing column width from $columns to $content-width to contain requested indent";
     }
 
     # The first line is allowed to have zero characters if the indent consumes all available space,
     # in which case text starts on the next line instead.
-    %first-line<content> = [max] 0, $columns - %first-line<margin>;
-    %body-line<content> = [max] 1, $columns - %body-line<margin>;
+    %first-line<content> = [max] 0, $content-width - %first-line<margin>;
+    %body-line<content> = [max] 1, $content-width - %body-line<margin>;
 
     %first-line<width> = [+] %first-line<margin content>;
     %body-line<width> = [+] %body-line<margin content>;
@@ -109,14 +116,13 @@ sub wrap(Str $para-indent, Str $body-indent, Int :$tabstop = 8, *@texts) returns
             $remainder = $1;
             $out ~= unexpand-if($output-delimiter ~ %current<indent> ~ $0);
         }
-        elsif $huge eq 'die' or $columns >= 2 {
-            die "Couldn't wrap text - requested text width '$columns' is too small";
+        elsif $huge eq 'die' or $content-width >= 2 {
+            die "Couldn't wrap text - requested text width '$content-width' is too small";
         }
         else {
-            # $columns < 2, attempt to recover by expanding it.
-            warn "Failed to wrap with text width set to '$columns', retrying with 2";
-            $columns = 2;
-            return wrap($para-indent, $body-indent, @texts);
+            # $content-width < 2, attempt to recover by expanding it.
+            warn "Failed to wrap with text width set to '$content-width', retrying with 2";
+            return wrap($para-indent, $body-indent, :columns(2), @texts);
         }
 
         if $old-pos == $pos and %current<content> == %body-line<content> {
