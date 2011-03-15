@@ -6,6 +6,4 @@ use Text::Wrap;
 
 plan 1;
 
-$Text::Wrap::columns = 1;
-
-lives_ok { wrap('', '', '') };
+lives_ok { wrap('', '', '', :columns(1)) };

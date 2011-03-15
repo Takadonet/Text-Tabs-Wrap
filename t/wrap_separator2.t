@@ -19,20 +19,11 @@ my @tests = (
     }
 );
 
-plan 2 * @tests;
+plan +@tests;
 
-# with parameters
+my &wrapper = &wrap.assuming('', '', :columns(15), :separator2('[N]'));
 for @tests {
-    is  wrap('', '', :columns(15), :separator2<[N]>, $_<in>),
-        $_<out>,
-        $_<why>;
-}
-
-# with globals
-$Text::Wrap::columns = 15;
-$Text::Wrap::separator2 = '[N]';
-for @tests {
-    is  wrap('', '', $_<in>),
+    is  &wrapper($_<in>),
         $_<out>,
         $_<why>;
 }

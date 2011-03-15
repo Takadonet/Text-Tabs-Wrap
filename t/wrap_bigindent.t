@@ -6,8 +6,6 @@ use Text::Wrap;
 
 plan 1;
 
-$Text::Wrap::columns = 10;
-$Text::Wrap::huge = 'wrap';
-is  wrap('verylongindent', '', 'foo'),
+is  wrap('verylongindent', '', :columns(10), :huge<wrap>, 'foo'),
     "verylongindent\nfoo",
     'Words wrap to next line correctly when the first-line indent is bigger than $columns';

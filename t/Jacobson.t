@@ -11,11 +11,9 @@ my @input = (
 
 plan +@input;
 
-$Text::Wrap::huge = 'overflow';
-$Text::Wrap::columns = 9;
-$Text::Wrap::break = rx{<?after <[,.]>>};
+my $break = rx{<?after <[,.]>>};
 
 for @input.kv -> $num, $str {
     todo (1+$num) => '<?after> NYI in Rakudo';
-    lives_ok { wrap('', '', $str) }
+    lives_ok { wrap('', '', $str, :huge<overflow>, :columns(9), :$break) }
 }

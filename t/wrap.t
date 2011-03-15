@@ -6,7 +6,6 @@ use TestFiles;
 use Text::Wrap;
 
 TestFiles::run(
-    tests-per-block => 2,
     test-block => sub ($in, $out, $filename) {
         my @in = $in.lines;
         my @out = $out.lines;
@@ -27,17 +26,8 @@ TestFiles::run(
             $break = rx{\s};
         }
 
-        my &wrapper = &wrap.assuming('   ', ' ', @in.join("\n"));
-
-        # Test with parameterised break
-        is  &wrapper(:$break),
+        is  wrap('   ', ' ', @in.join("\n"), :$break),
             @out.join("\n"),
             "$filename - wrap.t";
-
-        # And with global var
-        $Text::Wrap::break = $break;
-        is  &wrapper(),
-            @out.join("\n"),
-            "$filename - old API - wrap.t";
     }
 );

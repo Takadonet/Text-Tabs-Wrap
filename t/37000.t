@@ -21,9 +21,8 @@ plan +@steps;
 
 my Str $current = $input;
 
-for @steps.kv -> $number, $regex {
-    $Text::Wrap::break = $regex;
-    $current = wrap('', '', $current);
+for @steps.kv -> $number, $break {
+    $current = wrap('', '', :$break, $current);
 
     is  $current,
         $output,

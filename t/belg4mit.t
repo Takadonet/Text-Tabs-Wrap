@@ -8,10 +8,8 @@ use Text::Wrap;
 
 plan 1;
 
-$Text::Wrap::columns = 1;
-
 lives_ok {
-    wrap('', '',
+    wrap('', '', :columns(1),
     'H4sICNoBwDoAA3NpZwA9jbsNwDAIRHumuC4NklvXTOD0KSJEnwU8fHz4Q8M9i3sGzkS7BBrm
     OkCTwsycb4S3DloZuMIYeXpLFqw5LaMhXC2ymhreVXNWMw9YGuAYdfmAbwomoPSyFJuFn2x8
     Opr8bBBidccAAAA');

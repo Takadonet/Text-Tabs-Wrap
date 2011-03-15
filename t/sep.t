@@ -5,15 +5,14 @@ use Test;
 use TestFiles;
 use Text::Wrap;
 
-$Text::Wrap::separator = '=';
-
 TestFiles::run(
     tests-per-block => 2,
     test-block => sub ($in, $out, $filename) {
         my $in-str = $in.slurp;
         my $out-str = $out.slurp;
+        my &wrapper = &wrap.assuming('   ', ' ', :separator('='));
 
-        is  wrap('   ', ' ', $in-str),
+        is  &wrapper($in-str),
             $out-str,
             "$filename - sep.t (as one string)";
 
@@ -21,7 +20,7 @@ TestFiles::run(
         my @in = $in-str.split(/\n/);
         @in[0 ..^ @in-1] >>~=>> "\n";
 
-        is  wrap('   ', ' ', @in),
+        is  &wrapper(@in),
             $out-str,
             "$filename - sep.t (array of lines)";
     }
