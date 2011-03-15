@@ -38,12 +38,13 @@ Both C<wrap()> and C<fill()> return a single string.
 
 =end pod
 
+# See below for documnentation of these options
 our $break = rx{\s};
-our $huge = 'wrap';             # How to handle long words; valid values are <wrap die overflow>
-our #`[Int] $columns = 76;      # Screen width
-our #`[Bool] $unexpand = True;  # Whether to compress leading indent into tabs after wrapping
-our #`[Str] $separator = "\n";  # String used to join wrapped "lines"
-our #`[Str] $separator2;        # String used to join lines, which preserves $separator if set
+our $huge = 'wrap';
+our $columns = 76;
+our $unexpand = True;
+our $separator = "\n";
+our $separator2;
 
 sub wrap(Str $para-indent, Str $body-indent,
          Int :$tabstop      = 8,
@@ -145,8 +146,6 @@ sub wrap(Str $para-indent, Str $body-indent,
     return $out ~ $remainder;
 }
 
-# Rewraps paragraphs, discarding original space. A paragraph is detected by leading indent on the
-# first line. If para-indent is the same as line-indent, paragraphs are separated by blank lines.
 sub fill(Str $para-indent, Str $body-indent, *@raw, *%wrap-opts) returns Str is export {
     @raw.join("\n")\
         .split(/\n\s+/)\
@@ -158,67 +157,85 @@ sub fill(Str $para-indent, Str $body-indent, *@raw, *%wrap-opts) returns Str is 
 
 =begin pod
 
-=head1 GLOBALS
+=head1 OPTIONS
 
-Text::Wrap has a number of package-global vars for backwards-compatibility with Perl 5; we'll add
-a more sensible function param way of setting these in the near future and remove these vars.
+Text::Wrap has a number of named parameters that can be passed to C<wrap()> or C<fill()>. The
+defaults for these are set in a number of package-global vars, but these only exist for
+backwards-compatibility with Perl 5; after a transition period we're removing them.
 
-Lines are wrapped at C<$Text::Wrap::columns> columns (default value: 76). C<$Text::Wrap::columns>
-should be set to the full width of your output device. The actual text width will normally be 1
-less than this as C<wrap()> reserves one character for the C<\n> ending each line. The exception to
-this is when the combined indentation and column width would result in no space for text otherwise.
+=begin item
+C<:$columns> (default: C<76>)
 
-It is possible to define how "words" are separated by modifying C<$Text::Wrap::break> (default
-value: C<rx/\s/>). Set this to any valid regex, such as C<rx/\s|':'/> to break before spaces or
-colons, C<rx/\s|"'"/> to break before spaces or apostrophes and so on. The default is simply
-to split on whitespace. (This means, among other things, that trailing punctuation such as full
-stops or commas stay with the word they are "attached" to.) Setting C<$Text::Wrap::break> to a
-regular expression that doesn't eat any characters (perhaps just a forward look-ahead assertion)
-will likely cause bad things to happen.
+This controls the maximum width of a line, including indent. The actual text width will normally be
+1 less than this as C<wrap()> reserves one character for the C<\n> ending each line, except when
+C<$columns> is set so small there'd be no room for normal text on a line. If this is set smaller
+than a line's indent + 1 character of text, a warning is issued and this value is overridden.
+=end item
+
+=begin item
+C<:$break> (default: C<rx/\s/>)
+
+This defines the logical word separator. Set this to any valid regex, such as e.g. C<rx/\s|':'/> to
+break before spaces/colons or C<rx/\s|"'"/> to break before spaces/apostrophes. The default is
+simply to split on whitespace. (This means, among other things, that trailing punctuation such as
+full stops or commas stay with the word they are "attached" to.) Setting C<$break> to a regular
+expression that doesn't eat any characters (perhaps just a forward look-ahead assertion) will likely
+cause bad things to happen.
+=end item
+
+=begin item
+C<:$unexpand> (default: C<Bool::True>), C<:$tabstop> (default: C<8>)
 
 C<wrap()> starts its work by expanding all tabs in its input into spaces. The last thing it does is
-to turn spaces back into tabs. If you do not want tabs in the output, set C<$Text::Wrap::unexpand>
-to a false value. Likewise if you do not want to use 8-character tabstops, pass a different numeric
+to turn spaces back into tabs. If you do not want tabs in the output, set C<$unexpand> to a false
+value. Likewise if you do not want to use 8-character tabstops, pass a different numeric
 C<:$tabstop> value to C<wrap()>.
+=end item
+
+=begin item
+C<:$separator> (default: C<"\n">), C<:$separator2> (default: not set)
 
 =for comment
 N.B. The logic of the separator vars is horribly convoluted. This part of the module may change.
 
-C<$Text::Wrap::separator> defines the logical line delimiter for output. By default this is
-C<\n>. C<$Text::Wrap::separator2> is similar, but when set it overrides the value of C<$separator>
-and existing newline characters in the input are preserved.
+C<$Text::Wrap::separator> defines the logical line delimiter for output. C<$Text::Wrap::separator2>
+is similar, but when set it overrides the value of C<$separator> and existing newline characters in
+the input are preserved.
+=end item
 
-When words that are longer than C<$columns> are encountered, by default they are broken up.
-C<wrap()> inserts a line break in the word at column C<$columns>. This behavior can be overridden by
-setting C<$Text::Wrap::huge> to 'die' or to 'overflow'. When set to 'die', large words will cause
-C<die()> to be called. When set to 'overflow', large words will be left intact.
+=begin item
+C<:$huge> (default: C<'wrap'>)
 
-Historical notes: 'die' used to be the default value of C<$huge>. Now, 'wrap' is the default value.
+This defines the behaviour when encountering a "huge" word (anything that can't be normally broken
+before C<$columns> characters on the line). 3 values are accepted:
+
+=defn C<'wrap'>
+C<wrap()> inserts a line break in the word at column C<$columns>.
+
+=defn C<'overflow'>
+Words longer than C<$columns> are put on a line by themselves, but otherwise left unwrapped.
+
+=defn C<'die'>
+C<wrap()> dies upon finding a word it can't fit into the space allocated.
+=end item
 
 =head1 EXAMPLES
 
-Code:
+C<wrap()> goes well with heredocs:
 
   print wrap("\t","",q:to<END>);
   This is a bit of text that forms
   a normal book-style indented paragraph
   END
+  # "   This is a bit of text that forms
+  # a normal book-style indented paragraph
+  # "
 
-Result:
+You can easily make a wrap wrapper with your own defaults using C<.assuming>:
 
-  "   This is a bit of text that forms
-  a normal book-style indented paragraph
-  "
-
-Code:
-
-  $Text::Wrap::columns=20;
-  $Text::Wrap::separator="|";
-  print wrap("","","This is a bit of text that forms a normal book-style paragraph");
-
-Result:
-
-  "This is a bit of|text that forms a|normal book-style|paragraph"
+  my &wrapper = &wrap.assuming('', '', :columns(20), :separator('|'));
+  print &wrapper('This is a bit of text that forms a normal book-style paragraph');
+  # "This is a bit of|text that forms a|normal book-style|paragraph"
 
 =head1 AUTHORS
 
