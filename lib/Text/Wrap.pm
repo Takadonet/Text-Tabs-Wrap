@@ -147,11 +147,11 @@ sub wrap(Str $para-indent, Str $body-indent,
 
 # Rewraps paragraphs, discarding original space. A paragraph is detected by leading indent on the
 # first line. If para-indent is the same as line-indent, paragraphs are separated by blank lines.
-sub fill(Str $para-indent, Str $body-indent, *@raw) returns Str is export {
+sub fill(Str $para-indent, Str $body-indent, *@raw, *%wrap-opts) returns Str is export {
     @raw.join("\n")\
         .split(/\n\s+/)\
         .map({
-            wrap($para-indent, $body-indent, $^paragraph.split(/\s+/).join(' '))
+            wrap($para-indent, $body-indent, $^paragraph.split(/\s+/).join(' '), %wrap-opts)
         })\
         .join($para-indent eq $body-indent ?? "\n\n" !! "\n");
 }
