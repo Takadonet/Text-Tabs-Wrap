@@ -1,10 +1,14 @@
 module TestFiles;
 use Test;
 
+sub basename {
+    ($*PROGRAM_NAME ~~ m{ '/' (<-[/]>+) $ })[0];
+}
+
 our sub run(
     Callable $test-block,
-    Str $input-dir = "$*PROGRAM_NAME.input",
-    Str $output-dir = "$*PROGRAM_NAME.output",
+    Str $input-dir = "t_files/{basename}.input",
+    Str $output-dir = "t_files/{basename}.output",
     Int $tests-per-block = 1,
     Int $add-to-plan = 0
 ) {
