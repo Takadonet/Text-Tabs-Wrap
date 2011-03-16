@@ -47,14 +47,14 @@ our $separator = "\n";
 our $separator2;
 
 sub wrap(Str $para-indent, Str $body-indent,
-         Int :$tabstop      = 8,
-         Int :$columns      = $Text::Wrap::columns,
+         #`[Int] :$tabstop      = 8,
+         #`[Int] :$columns      = $Text::Wrap::columns,
          Str :$huge         = $Text::Wrap::huge,
          Str :$separator    = $Text::Wrap::separator,
          Str :$separator2   = $Text::Wrap::separator2,
          Bool :$unexpand    = $Text::Wrap::unexpand,
          Regex :$break      = $Text::Wrap::break,
-         *@texts) returns Str is export {
+         *@texts) is export {
     my $tail = pop(@texts);
     my $text = expand(@texts.map({ /\s+$/ ?? $_ !! $_ ~ ' ' }).join ~ $tail);
 
@@ -146,7 +146,7 @@ sub wrap(Str $para-indent, Str $body-indent,
     return $out ~ $remainder;
 }
 
-sub fill(Str $para-indent, Str $body-indent, *@raw, *%wrap-opts) returns Str is export {
+sub fill(Str $para-indent, Str $body-indent, *@raw, *%wrap-opts) is export {
     @raw.join("\n")\
         .split(/\n\s+/)\
         .map({
