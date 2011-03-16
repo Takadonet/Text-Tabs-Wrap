@@ -21,16 +21,13 @@ The modules will load in Niecza, but aren't quite working yet...
 Building Text-Tabs-Wrap
 -----------------------
 
-Currently the easiest way is to get [neutro](https://github.com/tadzik/neutro), and then on the
-command line run `neutro Text-Tabs-Wrap`.
+We recommend using [Pies](https://github.com/tadzik/Pies), as it does all the work of module
+installation for you.
 
-To run the test suite, use a command like:
+If you prefer to do things manually instead, you can run the test suite like so:
 
-    PERL6LIB="lib:t_lib" prove -e perl6 -j 4
-
-You might also be interested in:
-
-    prove -e 'mono path/to/Niecza.exe -I lib -I t_lib'
+    PERL6LIB="lib" prove -e perl6
+    prove -e 'mono path/to/Niecza.exe -I lib'
 
 Credits
 -------
